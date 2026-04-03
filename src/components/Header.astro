@@ -45,39 +45,85 @@ import HeaderLink from './HeaderLink.astro';
 <style>
 	header {
 		margin: 0;
-		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		padding: 0.5em 1em;
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		background: linear-gradient(180deg, rgba(7, 13, 19, 90%), rgba(7, 13, 19, 72%));
+		backdrop-filter: blur(10px);
+		border-bottom: 1px solid rgba(46, 230, 166, 22%);
+		box-shadow: 0 12px 30px rgba(0, 0, 0, 25%);
 	}
 	h2 {
 		margin: 0;
-		font-size: 1em;
+		font-size: 1.05em;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	h2 a,
 	h2 a.active {
 		text-decoration: none;
+		color: var(--accent-hot);
 	}
 	nav {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		max-width: 1000px;
+		margin: 0 auto;
+		gap: 1em;
 	}
 	nav a {
-		padding: 1em 0.5em;
-		color: var(--black);
-		border-bottom: 4px solid transparent;
+		padding: 0.7em 0.55em;
+		color: var(--text-soft);
+		border-bottom: 2px solid transparent;
 		text-decoration: none;
+		transition: color 160ms ease, border-color 160ms ease, transform 160ms ease;
+	}
+	nav a:hover {
+		color: var(--accent-hot);
+		transform: translateY(-1px);
 	}
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
+		color: var(--accent-hot);
+	}
+	.internal-links {
+		display: flex;
+		gap: 0.2em;
+		padding: 0.16em 0.4em;
+		border: 1px solid rgba(46, 230, 166, 20%);
+		border-radius: 999px;
+		background: rgba(14, 26, 38, 70%);
 	}
 	.social-links,
 	.social-links a {
 		display: flex;
 	}
+	.social-links {
+		gap: 0.25em;
+	}
+	.social-links a {
+		padding: 0.4em;
+		color: var(--text-soft);
+	}
+	.social-links a:hover {
+		color: var(--accent-hot);
+	}
 	@media (max-width: 720px) {
+		nav {
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+		h2 {
+			width: 100%;
+			text-align: center;
+		}
+		.internal-links {
+			order: 2;
+		}
 		.social-links {
 			display: none;
 		}
