@@ -2,40 +2,168 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import { getCollection } from 'astro:content';
+import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const baseURL = import.meta.env.BASE_URL;
+const recentPosts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 3);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.intro {
+				margin-bottom: 3em;
+			}
+			.intro h1 {
+				margin-bottom: 0.6em;
+			}
+			.intro p {
+				font-size: 1.1em;
+				line-height: 1.8;
+			}
+			.intro .highlight {
+				color: var(--accent);
+				font-weight: 600;
+			}
+
+			/* 最新文章 */
+			.section-title {
+				font-size: 0.8em;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				color: var(--text-muted);
+				margin-bottom: 1.5em;
+				font-weight: 600;
+			}
+			.post-list {
+				display: flex;
+				flex-direction: column;
+				gap: 0;
+			}
+			.post-item {
+				display: flex;
+				align-items: baseline;
+				gap: 1em;
+				padding: 1em 0;
+				border-bottom: 1px solid var(--border);
+				text-decoration: none;
+				transition: background 0.2s ease;
+				margin: 0 -0.8em;
+				padding-left: 0.8em;
+				padding-right: 0.8em;
+				border-radius: 8px;
+				border-bottom: none;
+			}
+			.post-item:hover {
+				background: rgba(255, 255, 255, 0.03);
+			}
+			.post-item .post-title {
+				color: var(--text-primary);
+				font-weight: 600;
+				font-size: 1.05em;
+				line-height: 1.4;
+				flex: 1;
+			}
+			.post-item:hover .post-title {
+				color: var(--accent);
+			}
+			.post-item .post-date {
+				color: var(--text-muted);
+				font-size: 0.85em;
+				white-space: nowrap;
+				font-variant-numeric: tabular-nums;
+			}
+			.view-all {
+				display: inline-block;
+				margin-top: 1.5em;
+				font-size: 0.95em;
+			}
+
+			/* 理念 */
+			.beliefs {
+				margin-top: 3em;
+			}
+			.beliefs ul {
+				padding-left: 0;
+				list-style: none;
+			}
+			.beliefs li {
+				padding: 0.7em 0;
+				color: var(--text-secondary);
+				position: relative;
+				padding-left: 1.5em;
+			}
+			.beliefs li::before {
+				content: "";
+				position: absolute;
+				left: 0;
+				top: 1.15em;
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: var(--accent);
+				opacity: 0.5;
+			}
+			.beliefs li:nth-child(2)::before { background: var(--pink); }
+			.beliefs li:nth-child(3)::before { background: var(--green); }
+			.beliefs li:nth-child(4)::before { background: var(--purple); }
+
+			.divider {
+				height: 1px;
+				background: var(--border);
+				margin: 3em 0;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>Ship Fast, Think Deep.</h1>
-			<p>
-				这里是我的工程日志站点，聚焦构建高性能 Web、可维护架构与开发体验优化。
-				页面会持续发布技术拆解、实战复盘和工具链笔记。
-			</p>
-			<blockquote>
-				系统不是一次写完的，而是一次次可验证迭代出来的。
-			</blockquote>
-			<p>
-				这个站点基于 <a href="https://astro.build/">Astro</a> 构建，目标是用最少复杂度交付顺滑体验。
-				如果你也在做博客或作品站，可以把它当成一个“可运行的工程模板”。
-			</p>
-			<p>你可以从这些入口开始浏览：</p>
-			<ul>
-				<li><a href={`${baseURL}blog`}>Blog</a>: 文章索引，包含完整技术内容</li>
-				<li><a href={`${baseURL}about`}>About</a>: 我的技术背景、方法论和当前研究方向</li>
-				<li>代码结构：你可以直接在工程里查看组件和布局实现</li>
-			</ul>
-			<p>
-				如果你正在搭建类似站点，建议优先关注三件事：信息密度、加载性能、长期可维护性。
-			</p>
+			<section class="intro">
+				<h1>Ship Fast, Think Deep.</h1>
+				<p>
+					我是一个在生产环境中成长起来的工程师，关注
+					<span class="highlight">系统设计</span>、
+					<span class="highlight">前端工程化</span>和
+					<span class="highlight">开发者体验</span>。
+					这个站点记录我在真实项目中的技术决策、架构思考和踩坑复盘。
+				</p>
+				<p>
+					不写入门教程，只聊那些文档里不会写的东西。
+				</p>
+			</section>
+
+			<div class="divider"></div>
+
+			<section>
+				<div class="section-title">最新文章</div>
+				<div class="post-list">
+					{recentPosts.map((post) => (
+						<a href={`${baseURL}blog/${post.id}/`} class="post-item">
+							<span class="post-title">{post.data.title}</span>
+							<span class="post-date"><FormattedDate date={post.data.pubDate} /></span>
+						</a>
+					))}
+				</div>
+				<a href={`${baseURL}blog`} class="view-all">查看全部文章 &rarr;</a>
+			</section>
+
+			<div class="divider"></div>
+
+			<section class="beliefs">
+				<h2>我相信的几件事</h2>
+				<ul>
+					<li><strong>复杂度是敌人。</strong>如果一个方案 20 分钟讲不清楚，大概率不是最优解。</li>
+					<li><strong>可观测性 > 可扩展性。</strong>你无法优化看不见的东西。</li>
+					<li><strong>代码是写给人看的。</strong>六个月后的你会感谢现在的命名习惯。</li>
+					<li><strong>自动化是一种尊重。</strong>人不应该做机器擅长的事。</li>
+				</ul>
+			</section>
 		</main>
 		<Footer />
 	</body>

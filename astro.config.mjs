@@ -8,7 +8,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	// 站点主域名
 	site: 'https://misaka789.github.io',
-	// 本地优先使用根路径，避免资源加载错位
-	base: '/',
-	//integrations: [mdx(), sitemap()],
+	// 针对 GitHub Pages 的子路径部署进行配置
+	base: '/my-blog/',
+	integrations: [mdx(), sitemap()],
 });
