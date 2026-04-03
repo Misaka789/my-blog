@@ -3,7 +3,7 @@ const today = new Date();
 ---
 
 <footer>
-	&copy; {today.getFullYear()} Your name here. All rights reserved.
+	&copy; {today.getFullYear()} Smoggy Saturn Lab. Built with focus and caffeine.
 	<div class="social-links">
 		<a href="https://m.webtoo.ls/@astro" target="_blank">
 			<span class="sr-only">Follow Astro on Mastodon</span>
@@ -41,10 +41,13 @@ const today = new Date();
 </footer>
 <style>
 	footer {
-		padding: 2em 1em 6em 1em;
-		background: linear-gradient(var(--gray-gradient)) no-repeat;
-		color: rgb(var(--gray));
+		padding: 2.6em 1em 4em 1em;
+		background:
+			linear-gradient(180deg, rgba(7, 13, 19, 0%), rgba(7, 13, 19, 75%) 25%, rgba(7, 13, 19, 96%) 100%)
+			no-repeat;
+		color: var(--text-muted);
 		text-align: center;
+		border-top: 1px solid rgba(46, 230, 166, 18%);
 	}
 	.social-links {
 		display: flex;
@@ -54,9 +57,13 @@ const today = new Date();
 	}
 	.social-links a {
 		text-decoration: none;
-		color: rgb(var(--gray));
+		color: var(--text-soft);
+		padding: 0.35em;
+		border-radius: 8px;
+		transition: background 160ms ease, color 160ms ease;
 	}
 	.social-links a:hover {
-		color: rgb(var(--gray-dark));
+		color: var(--accent-hot);
+		background: rgba(46, 230, 166, 8%);
 	}
 </style>
