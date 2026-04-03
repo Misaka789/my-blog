@@ -11,46 +11,71 @@ type Props = CollectionEntry<'blog'>['data'];
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={title} description={description} />
 		<style>
 			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+				max-width: 680px;
+			}
+			.article-header {
+				margin-bottom: 2.5em;
+			}
+			.article-header h1 {
+				font-size: 2.2em;
+				line-height: 1.2;
+				margin-bottom: 0.5em;
+			}
+			.article-meta {
+				display: flex;
+				align-items: center;
+				gap: 0.8em;
+				color: var(--text-muted);
+				font-size: 0.9em;
+			}
+			.article-meta .separator {
+				width: 3px;
+				height: 3px;
+				border-radius: 50%;
+				background: var(--text-muted);
+				opacity: 0.5;
 			}
 			.hero-image {
-				width: 100%;
+				margin-bottom: 2em;
 			}
 			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+				width: 100%;
+				border-radius: var(--radius);
 			}
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
+				color: var(--text-secondary);
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
+			.prose :global(h2) {
+				color: var(--text-primary);
+				margin-top: 2.5em;
 			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
+			.prose :global(h3) {
+				color: var(--text-primary);
+				margin-top: 2em;
 			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
+			.prose :global(p) {
+				margin-bottom: 1.5em;
 			}
-			.last-updated-on {
-				font-style: italic;
+			.prose :global(strong) {
+				color: var(--text-primary);
+			}
+			.prose :global(a) {
+				color: var(--accent);
+			}
+			.back-link {
+				display: inline-block;
+				margin-top: 3em;
+				padding: 0.5em 0;
+				font-size: 0.92em;
+				color: var(--text-muted);
+			}
+			.back-link:hover {
+				color: var(--accent);
 			}
 		</style>
 	</head>
@@ -59,27 +84,28 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
+				<div class="article-header">
+					<h1>{title}</h1>
+					<div class="article-meta">
+						<FormattedDate date={pubDate} />
+						{updatedDate && (
+							<>
+								<span class="separator"></span>
+								<span>更新于 <FormattedDate date={updatedDate} /></span>
+							</>
+						)}
 					</div>
+				</div>
+				{heroImage && (
+					<div class="hero-image">
+						<Image width={1020} height={510} src={heroImage} alt="" />
+					</div>
+				)}
+				<div class="prose">
 					<slot />
 				</div>
 			</article>
+			<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">&larr; 返回文章列表</a>
 		</main>
 		<Footer />
 	</body>

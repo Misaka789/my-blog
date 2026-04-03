@@ -1,132 +1,191 @@
 /*
-  The CSS in this style tag is based off of Bear Blog's default CSS.
-  https://github.com/HermanMartinus/bearblog/blob/297026a877bc2ab2b3bdfbd6b9f7961c350917dd/templates/styles/blog/default.css
-  License MIT: https://github.com/HermanMartinus/bearblog/blob/master/LICENSE.md
+  Redesigned with inspiration from leerob.io, joshwcomeau.com, overreacted.io
+  Focus: readability, warmth, content-first, elegant motion
  */
 
 :root {
-	--accent: #2ee6a6;
-	--accent-dark: #10b981;
-	--accent-hot: #52f6c7;
-	--surface: #070d13;
-	--surface-elevated: #0e1a26;
-	--surface-card: #132334;
-	--surface-line: #1f3346;
-	--text-main: #d5f9ec;
-	--text-soft: #9ec8bd;
-	--text-muted: #6f8f88;
-	--black: 8, 12, 18;
-	--gray: 86, 118, 130;
-	--gray-light: 33, 50, 68;
-	--gray-dark: 213, 249, 235;
-	--gray-gradient: rgba(9, 16, 24, 90%), #070d13;
-	--box-shadow:
-		0 0 0 1px rgba(46, 230, 166, 15%), 0 10px 28px rgba(0, 0, 0, 35%),
-		0 20px 45px rgba(0, 0, 0, 45%);
+	/* 温暖的中性色系 + 有活力的点缀色 */
+	--bg: #0f1117;
+	--bg-elevated: #161820;
+	--bg-card: #1c1e28;
+	--bg-card-hover: #22242f;
+	--border: rgba(255, 255, 255, 0.06);
+	--border-hover: rgba(255, 255, 255, 0.12);
+
+	/* 文字层次 */
+	--text-primary: #e8e6e3;
+	--text-secondary: #a09b96;
+	--text-muted: #6b6660;
+
+	/* 多彩点缀色 - 不再只是绿色 */
+	--accent: #6c9cfc;       /* 柔和蓝 */
+	--accent-hover: #8bb4ff;
+	--pink: #f08080;          /* 珊瑚粉 */
+	--green: #7dd3a8;         /* 薄荷绿 */
+	--purple: #b397f6;        /* 薰衣草紫 */
+	--amber: #f0c674;         /* 琥珀黄 */
+	--cyan: #7dd3e8;          /* 天青色 */
+
+	--font-sans: "Atkinson", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--font-mono: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+
+	--radius: 12px;
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+	--shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+	--shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.3);
+	--transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 @font-face {
 	font-family: "Atkinson";
-	src: url("/fonts/atkinson-regular.woff") format("woff");
+	src: url("/my-blog/fonts/atkinson-regular.woff") format("woff");
 	font-weight: 400;
 	font-style: normal;
 	font-display: swap;
 }
 @font-face {
 	font-family: "Atkinson";
-	src: url("/fonts/atkinson-bold.woff") format("woff");
+	src: url("/my-blog/fonts/atkinson-bold.woff") format("woff");
 	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
 }
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+	from { opacity: 0; transform: translateY(16px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+	0% { background-position: -200% center; }
+	100% { background-position: 200% center; }
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-6px); }
+}
+
+@keyframes gradientShift {
+	0% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+	100% { background-position: 0% 50%; }
+}
+
+/* ===== Base ===== */
+html {
+	scroll-behavior: smooth;
+}
+
 body {
-	font-family: "Atkinson", "IBM Plex Sans", "Segoe UI", sans-serif;
+	font-family: var(--font-sans);
 	margin: 0;
 	padding: 0;
-	text-align: left;
-	background:
-		radial-gradient(circle at 20% 0%, rgba(46, 230, 166, 12%), transparent 35%),
-		radial-gradient(circle at 80% 10%, rgba(82, 246, 199, 10%), transparent 30%),
-		linear-gradient(180deg, #0b121c 0%, #070d13 40%, #060b10 100%);
-	background-attachment: fixed;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-	color: var(--text-main);
-	font-size: 19px;
-	line-height: 1.7;
-	position: relative;
+	background: var(--bg);
+	color: var(--text-primary);
+	font-size: 17px;
+	line-height: 1.75;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
 }
+
+/* 柔和的顶部光晕 - 不再用网格 */
 body::before {
 	content: "";
 	position: fixed;
-	inset: 0;
+	top: -30%;
+	left: -10%;
+	width: 60%;
+	height: 60%;
+	background: radial-gradient(ellipse, rgba(108, 156, 252, 0.04), transparent 60%);
 	pointer-events: none;
-	background-image:
-		linear-gradient(rgba(46, 230, 166, 5%) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(46, 230, 166, 4%) 1px, transparent 1px);
-	background-size: 28px 28px;
-	opacity: 0.28;
 	z-index: -1;
 }
+body::after {
+	content: "";
+	position: fixed;
+	bottom: -20%;
+	right: -10%;
+	width: 50%;
+	height: 50%;
+	background: radial-gradient(ellipse, rgba(240, 128, 128, 0.03), transparent 60%);
+	pointer-events: none;
+	z-index: -1;
+}
+
 main {
-	width: 860px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
+	width: 100%;
+	max-width: 680px;
+	margin: 0 auto;
+	padding: 3em 1.5em;
+	animation: fadeInUp 0.5s ease-out both;
 }
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin: 0 0 0.5rem 0;
-	color: var(--text-main);
-	line-height: 1.2;
-	letter-spacing: 0.01em;
+
+/* ===== Typography ===== */
+h1, h2, h3, h4, h5, h6 {
+	margin: 0 0 0.6rem 0;
+	color: var(--text-primary);
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	font-family: var(--font-sans);
 }
+
 h1 {
-	font-size: 2.9em;
-}
-h1,
-h2,
-h3 {
-	font-family: "Atkinson", "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
-}
-h2 {
-	font-size: 2.441em;
-}
-h3 {
-	font-size: 1.953em;
-}
-h4 {
-	font-size: 1.563em;
-}
-h5 {
-	font-size: 1.25em;
-}
-strong,
-b {
+	font-size: 2.5em;
 	font-weight: 700;
+	letter-spacing: -0.03em;
+	line-height: 1.15;
 }
+
+h2 {
+	font-size: 1.75em;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	margin-top: 2.5em;
+	margin-bottom: 0.8em;
+}
+
+h3 {
+	font-size: 1.35em;
+	font-weight: 600;
+}
+
+h4 {
+	font-size: 1.15em;
+	font-weight: 600;
+}
+
+strong, b {
+	font-weight: 700;
+	color: var(--text-primary);
+}
+
+/* ===== Links ===== */
 a {
 	color: var(--accent);
-	text-underline-offset: 0.16em;
-	text-decoration-thickness: 1.5px;
+	text-decoration: underline;
+	text-decoration-color: rgba(108, 156, 252, 0.3);
+	text-underline-offset: 0.2em;
+	text-decoration-thickness: 1px;
+	transition: color var(--transition), text-decoration-color var(--transition);
 }
 a:hover {
-	color: var(--accent-hot);
+	color: var(--accent-hover);
+	text-decoration-color: var(--accent-hover);
 }
+
 p {
-	margin-bottom: 1em;
+	margin-bottom: 1.2em;
+	color: var(--text-secondary);
 }
 .prose p {
-	margin-bottom: 2em;
+	margin-bottom: 1.8em;
 }
-textarea {
-	width: 100%;
-	font-size: 16px;
-}
-input {
+
+/* ===== Media ===== */
+textarea, input {
 	font-size: 16px;
 }
 table {
@@ -135,54 +194,104 @@ table {
 img {
 	max-width: 100%;
 	height: auto;
-	border-radius: 8px;
-	border: 1px solid rgba(46, 230, 166, 25%);
+	border-radius: var(--radius);
+	transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
+img:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+}
+
+/* ===== Code ===== */
 code {
-	padding: 2px 5px;
-	background-color: rgba(19, 35, 52, 85%);
-	color: #d8ffef;
-	border-radius: 2px;
-	font-family: "IBM Plex Mono", "SFMono-Regular", ui-monospace, monospace;
+	padding: 2px 7px;
+	background: var(--bg-card);
+	color: var(--pink);
+	border-radius: 6px;
+	font-family: var(--font-mono);
+	font-size: 0.88em;
 }
 pre {
-	padding: 1.5em;
-	border-radius: 8px;
-	border: 1px solid rgba(46, 230, 166, 22%);
-	background: rgba(7, 15, 23, 92%);
+	padding: 1.4em 1.6em;
+	border-radius: var(--radius);
+	background: var(--bg-elevated);
+	border: 1px solid var(--border);
 	overflow-x: auto;
+	font-size: 0.9em;
+	line-height: 1.65;
+	transition: border-color var(--transition), box-shadow var(--transition);
+}
+pre:hover {
+	border-color: var(--border-hover);
+	box-shadow: var(--shadow-md);
 }
 pre > code {
 	all: unset;
 }
+
+/* ===== Blockquote ===== */
 blockquote {
-	border-left: 4px solid var(--accent);
-	padding: 0.2em 0 0.2em 20px;
-	margin: 0;
-	font-size: 1.18em;
-	background: rgba(19, 35, 52, 28%);
-}
-hr {
-	border: none;
-	border-top: 1px solid rgba(46, 230, 166, 20%);
+	border-left: 3px solid var(--accent);
+	padding: 0.4em 0 0.4em 1.2em;
+	margin: 1.5em 0;
+	color: var(--text-secondary);
+	font-style: italic;
 }
 
-::selection {
-	background: rgba(46, 230, 166, 28%);
-	color: #effff9;
+/* ===== HR ===== */
+hr {
+	border: none;
+	height: 1px;
+	background: var(--border);
+	margin: 2.5em 0;
 }
+
+/* ===== Selection ===== */
+::selection {
+	background: rgba(108, 156, 252, 0.2);
+	color: var(--text-primary);
+}
+
+/* ===== Lists ===== */
+ul, ol {
+	padding-left: 1.5em;
+	color: var(--text-secondary);
+}
+li {
+	margin-bottom: 0.5em;
+}
+li::marker {
+	color: var(--text-muted);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+	width: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== Responsive ===== */
 @media (max-width: 720px) {
 	body {
-		font-size: 18px;
+		font-size: 16px;
 	}
 	main {
-		padding: 1.25em 0.7em;
+		padding: 1.5em 1em;
 	}
 	h1 {
-		font-size: 2.2em;
+		font-size: 2em;
 	}
 	h2 {
-		font-size: 1.8em;
+		font-size: 1.5em;
 	}
 }
 
@@ -194,12 +303,8 @@ hr {
 	height: 1px;
 	width: 1px;
 	overflow: hidden;
-	/* IE6, IE7 - a 0 height clip, off to the bottom right of the visible 1px box */
 	clip: rect(1px 1px 1px 1px);
-	/* maybe deprecated but we need to support legacy browsers */
 	clip: rect(1px, 1px, 1px, 1px);
-	/* modern browsers, clip-path works inwards from each corner */
 	clip-path: inset(50%);
-	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }

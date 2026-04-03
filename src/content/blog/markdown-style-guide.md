@@ -1,11 +1,11 @@
 ---
-title: 'Markdown Style Guide'
-description: 'Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro.'
+title: 'Markdown 写作规范与渲染速查表'
+description: '一份面向技术写作者的 Markdown 语法速查指南，涵盖标题、代码块、表格、引用等常用元素的最佳实践。也是本站的排版基准参考。'
 pubDate: 'Jun 19 2024'
 heroImage: '../../assets/blog-placeholder-1.jpg'
 ---
 
-Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro.
+这份指南既是一个 Markdown 语法的速查表，也是本站所有文章的排版基准。好的技术写作不只是内容有深度，排版和结构同样重要——它们决定了读者能否在 3 秒内判断"这篇文章是否值得读下去"。
 
 ## Headings
 

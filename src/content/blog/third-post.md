@@ -1,16 +1,102 @@
 ---
-title: 'Third post'
-description: 'Lorem ipsum dolor sit amet'
+title: '从一次线上事故聊聊：为什么可观测性不是"有了日志就行"'
+description: '日志、指标、链路追踪——可观测性三支柱人人都知道，但大多数团队的可观测性建设仍然停留在"出了问题翻日志"的阶段。聊聊如何真正建立起有效的可观测性体系。'
 pubDate: 'Jul 22 2022'
 heroImage: '../../assets/blog-placeholder-2.jpg'
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
+上个月经历了一次让我印象深刻的线上事故：API 响应时间从平均 120ms 逐渐爬升到 800ms，持续了 40 分钟才被发现。不是没有监控——Grafana 面板上有十几个图表，Slack 里有告警机器人。问题是，告警阈值设的是 2000ms，而 800ms 虽然体验已经明显恶化，但离告警线还远着呢。
 
-Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc. Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra massa massa ultricies mi.
+这次事故让我重新审视了一个老问题：**我们的可观测性到底在观测什么？**
 
-Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
+## "有日志"不等于"可观测"
 
-Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id cursus metus aliquam eleifend mi.
+很多团队的可观测性建设是这样的：每个请求打一行日志，出了问题 `grep` 一下。这不是可观测性，这是考古学。
 
-Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
+真正的可观测性需要回答三个层次的问题：
+
+1. **发生了什么？**（What）— 这是 Metrics 的职责
+2. **为什么发生？**（Why）— 这是 Traces 的职责
+3. **在哪个上下文中发生？**（Where）— 这是 Logs + Context 的职责
+
+```
+用户反馈"页面加载很慢"
+   ↓
+Metrics: P99 延迟从 200ms 飙升到 1.2s（发生了什么）
+   ↓
+Traces: 链路追踪显示数据库查询阶段耗时异常（为什么）
+   ↓
+Logs: 慢查询日志显示某个新上线的 JOIN 缺少索引（具体原因）
+```
+
+三者缺一不可。只有 Logs 等于盲人摸象，只有 Metrics 等于看到了症状却找不到病因。
+
+## 告警设计：不是越多越好
+
+那次事故暴露的另一个问题是告警策略。我们的告警规则基本都是静态阈值：CPU > 80%、延迟 > 2s、错误率 > 5%。
+
+问题在于，**静态阈值无法捕捉"趋势性恶化"**。延迟从 100ms 缓慢爬升到 800ms 的过程中，没有任何一个瞬间触发了阈值。
+
+改进后的策略：
+
+```yaml
+# 基于变化率的告警（而非绝对值）
+- alert: LatencyDegradation
+  expr: |
+    (
+      rate(http_request_duration_seconds_sum[5m])
+      / rate(http_request_duration_seconds_count[5m])
+    ) > 1.5 * (
+      rate(http_request_duration_seconds_sum[1h] offset 1d)
+      / rate(http_request_duration_seconds_count[1h] offset 1d)
+    )
+  for: 10m
+  annotations:
+    summary: "API 延迟较昨日同期上升 50% 以上"
+```
+
+核心思路：**不是问"现在慢不慢"，而是问"现在比正常时候慢多少"**。
+
+## 结构化日志：给未来的自己一份礼物
+
+非结构化日志是这样的：
+
+```
+2024-07-22 10:23:45 ERROR: Failed to process order 12345 for user john@example.com
+```
+
+看起来信息挺全？但当你需要查"过去一小时所有失败的订单中，有多少是因为支付超时"时，你会发现你需要写正则表达式去解析自由文本。
+
+结构化日志是这样的：
+
+```json
+{
+  "timestamp": "2024-07-22T10:23:45Z",
+  "level": "error",
+  "service": "order-service",
+  "event": "order_processing_failed",
+  "order_id": "12345",
+  "user_id": "u_abc123",
+  "error_type": "payment_timeout",
+  "duration_ms": 5230,
+  "trace_id": "abc-def-123"
+}
+```
+
+每个字段都可以被索引、过滤、聚合。配合 `trace_id`，你可以一键跳转到完整的请求链路。
+
+## 可观测性的成本问题
+
+可观测性不是免费的午餐。日志存储、指标采集、链路追踪都有成本。一个中型系统每天产生的日志量可以轻松突破 100GB。
+
+实际项目中的平衡策略：
+
+- **日志分级存储**：ERROR/WARN 保留 90 天，INFO 保留 7 天，DEBUG 只在需要时临时开启
+- **采样而非全量**：链路追踪用 10% 的采样率覆盖正常流量，100% 覆盖错误流量
+- **指标聚合**：原始指标保留 7 天，5分钟粒度聚合保留 30 天，1小时粒度聚合保留 1 年
+
+## 写在最后
+
+> 可观测性的终极目标不是"收集更多数据"，而是"在问题发生的前 5 分钟就知道它要发生"。
+
+从那次事故之后，我们团队有了一个新规则：**每次上线新功能，必须同步提交对应的监控面板和告警规则。** 功能和可观测性是一枚硬币的两面，缺了任何一面都不完整。
