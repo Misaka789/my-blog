@@ -1,6 +1,8 @@
 ---
 title: 'Markdown 写作规范与渲染速查表'
-description: '一份面向技术写作者的 Markdown 语法速查指南，涵盖标题、代码块、表格、引用等常用元素的最佳实践。也是本站的排版基准参考。'
+description: '一份面向技术写作者的 Markdown 语法速查指南，也是本站文章排版与结构的统一参考。'
+
+category: '技术写作'
 pubDate: 'Jun 19 2024'
 heroImage: '../../assets/blog-placeholder-1.jpg'
 ---

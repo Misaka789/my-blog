@@ -1,6 +1,8 @@
 ---
 title: 'API 设计的隐性契约：那些文档里不会写的东西'
-description: '好的 API 不只是"能用"，而是让消费者在没有文档的情况下也能猜对下一步。从命名到错误处理，聊聊 API 设计中那些决定开发者体验的隐性决策。'
+description: '聊聊 API 设计里那些文档不会明写、却会真实影响集成体验的隐性约束。'
+
+category: 'API 设计'
 pubDate: 'Jul 15 2022'
 heroImage: '../../assets/blog-placeholder-4.jpg'
 ---

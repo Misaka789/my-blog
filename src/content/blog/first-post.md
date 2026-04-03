@@ -1,6 +1,8 @@
 ---
 title: '为什么你的前端构建越来越慢——以及如何系统性地解决它'
-description: '从 Webpack 到 Vite 到 Turbopack，前端构建工具演进的底层逻辑，以及在实际项目中如何把构建时间压缩 70% 的实战方法论。'
+description: '从构建耗时逐步失控的真实项目出发，梳理定位前端构建瓶颈与持续治理的思路。'
+
+category: '前端工程'
 pubDate: 'Jul 08 2022'
 heroImage: '../../assets/blog-placeholder-3.jpg'
 ---

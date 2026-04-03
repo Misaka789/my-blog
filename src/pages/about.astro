@@ -1,0 +1,177 @@
+﻿---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { Image } from 'astro:assets';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import ProfileImage from '../assets/profile.jpg';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`关于 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={ProfileImage} />
+		<style>
+			.about-hero {
+				display: grid;
+				grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
+				gap: 1.5rem;
+				align-items: start;
+				padding: 1rem 0 2rem;
+			}
+
+			.portrait-panel,
+			.copy-panel,
+			.note-card {
+				padding: 1rem;
+			}
+
+			.portrait-panel :global(img) {
+				width: 100%;
+				aspect-ratio: 1 / 1.16;
+				object-fit: cover;
+				border-radius: calc(var(--radius-xl) - 8px);
+			}
+
+			.copy-panel {
+				display: grid;
+				gap: 1rem;
+				padding: 1.6rem;
+			}
+
+			.copy-panel p {
+				max-width: 42rem;
+				font-size: 1.04rem;
+			}
+
+			.info-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 0.9rem;
+			}
+
+			.info-card {
+				padding: 1rem 1.1rem;
+				border-radius: var(--radius-lg);
+				background: rgba(255, 255, 255, 0.76);
+				border: 1px solid rgba(114, 138, 123, 0.12);
+			}
+
+			.info-card span {
+				display: block;
+				margin-bottom: 0.35rem;
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
+			}
+
+			.note-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.note-card {
+				display: grid;
+				gap: 0.7rem;
+				background: rgba(255, 255, 255, 0.76);
+				border: 1px solid rgba(114, 138, 123, 0.14);
+				border-radius: var(--radius-xl);
+			}
+
+			.note-card span {
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
+			}
+
+			.contact-link {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: fit-content;
+				padding: 0.8rem 1rem;
+				border-radius: 999px;
+				background: var(--accent);
+				color: white;
+				font-weight: 700;
+				box-shadow: 0 16px 35px rgba(95, 141, 116, 0.24);
+			}
+
+			@media (max-width: 960px) {
+				.about-hero,
+				.note-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			@media (max-width: 720px) {
+				.copy-panel {
+					padding: 1.2rem;
+				}
+
+				.info-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="about-hero">
+				<div class="portrait-panel soft-panel">
+					<Image src={ProfileImage} alt="sonder avatar" width={700} height={812} />
+				</div>
+				<div class="copy-panel soft-panel">
+					<span class="section-tag">关于我</span>
+					<h1>你好，我是 sonder。</h1>
+					<p>这个博客是我给自己留的一块学习空间。它不追求把一切包装得很完美，而是更想把真实的理解过程、代码实践和阶段变化慢慢写清楚。</p>
+					<p>我希望这里看起来足够干净、足够舒展，也保留一点个人气质。这样每次打开的时候，不会觉得是在翻模板，而像是在翻自己的成长档案。</p>
+					<div class="info-grid">
+						<div class="info-card">
+							<span>昵称</span>
+							<strong>sonder</strong>
+						</div>
+						<div class="info-card">
+							<span>一句话</span>
+							<strong>保持热爱，无限进步</strong>
+						</div>
+						<div class="info-card">
+							<span>写作内容</span>
+							<strong>学习记录 / 实践笔记 / 阶段复盘</strong>
+						</div>
+						<div class="info-card">
+							<span>邮箱</span>
+							<strong>3192422357@qq.com</strong>
+						</div>
+					</div>
+					<a class="contact-link" href="mailto:3192422357@qq.com">给我发邮件</a>
+				</div>
+			</section>
+
+			<section class="note-grid">
+				<div class="note-card">
+					<span>为什么写</span>
+					<h3>为了让学习不只停留在“我好像懂了”</h3>
+					<p>很多内容只有写出来、重组过，才算真正进入自己的理解体系。这个博客就是这个过程的一部分。</p>
+				</div>
+				<div class="note-card">
+					<span>怎么写</span>
+					<h3>尽量写具体、写过程、写卡住的地方</h3>
+					<p>我会更关注真实的学习路径，而不是只保留最后那个“看起来正确”的答案。</p>
+				</div>
+				<div class="note-card">
+					<span>我希望它变成什么</span>
+					<h3>以后回来看时，能看到自己确实走远了</h3>
+					<p>它既是写给别人的，也是写给未来的自己。最好几年后再翻，还能看见现在的认真。</p>
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
