@@ -1,82 +1,111 @@
----
+﻿---
+import { Image } from 'astro:assets';
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import ProfileImage from '../assets/profile.jpg';
 
 const baseURL = import.meta.env.BASE_URL;
 ---
 
-<header>
-	<nav>
-		<a href={baseURL} class="logo">{SITE_TITLE}</a>
-		<div class="nav-links">
-			<HeaderLink href={baseURL}>Home</HeaderLink>
-			<HeaderLink href={`${baseURL}blog`}>Blog</HeaderLink>
-			<HeaderLink href={`${baseURL}about`}>About</HeaderLink>
-		</div>
-		<div class="social-links">
-			<a href="https://github.com/withastro/astro" target="_blank" aria-label="GitHub">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-			</a>
-			<a href="https://twitter.com/astrodotbuild" target="_blank" aria-label="Twitter">
-				<svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20"><path fill="currentColor" d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/></svg>
-			</a>
-		</div>
-	</nav>
+<header class="site-header">
+	<div class="shell header-shell">
+		<a href={baseURL} class="identity">
+			<Image src={ProfileImage} alt="sonder avatar" width={58} height={58} />
+			<div class="identity-copy">
+				<strong>{SITE_TITLE}</strong>
+				<span>个人学习博客</span>
+			</div>
+		</a>
+		<nav class="nav-links" aria-label="Primary">
+			<HeaderLink href={baseURL}>首页</HeaderLink>
+			<HeaderLink href={`${baseURL}blog`}>文章</HeaderLink>
+			<HeaderLink href={`${baseURL}about`}>关于</HeaderLink>
+		</nav>
+	</div>
 </header>
+
 <style>
-	header {
+	.site-header {
 		position: sticky;
 		top: 0;
-		z-index: 20;
-		background: rgba(15, 17, 23, 0.8);
-		backdrop-filter: blur(12px) saturate(1.2);
-		border-bottom: 1px solid var(--border);
+		z-index: 40;
+		padding: 1rem 0 0;
+		background: linear-gradient(180deg, rgba(247, 251, 248, 0.94), rgba(247, 251, 248, 0.68), transparent);
+		backdrop-filter: blur(14px);
 	}
-	nav {
+
+	.header-shell {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		max-width: 680px;
-		margin: 0 auto;
-		padding: 0.8em 1.5em;
+		gap: 1rem;
+		padding: 0.9rem 1rem;
+		border-radius: 999px;
+		background: rgba(248, 252, 249, 0.9);
+		border: 1px solid rgba(103, 129, 114, 0.18);
+		box-shadow: 0 18px 38px rgba(84, 110, 92, 0.08);
 	}
-	.logo {
-		font-weight: 700;
-		font-size: 1em;
-		color: var(--text-primary);
-		text-decoration: none;
-		letter-spacing: -0.02em;
-		transition: opacity 0.2s ease;
-	}
-	.logo:hover {
-		opacity: 0.7;
-	}
-	.nav-links {
-		display: flex;
-		gap: 0.3em;
-	}
-	.social-links {
-		display: flex;
-		gap: 0.5em;
+
+	.identity {
+		display: inline-flex;
 		align-items: center;
+		gap: 0.9rem;
+		min-width: 0;
+		padding: 0.35rem 0.45rem;
+		border-radius: 999px;
 	}
-	.social-links a {
+
+	.identity :global(img) {
+		width: 3.6rem;
+		height: 3.6rem;
+		border-radius: 999px;
+		object-fit: cover;
+		box-shadow: 0 10px 24px rgba(84, 110, 92, 0.1);
+	}
+
+	.identity-copy {
 		display: flex;
-		color: var(--text-muted);
-		padding: 0.3em;
-		border-radius: 6px;
-		text-decoration: none;
-		transition: color 0.2s ease;
+		flex-direction: column;
+		gap: 0.15rem;
 	}
-	.social-links a:hover {
-		color: var(--text-primary);
+
+	.identity-copy strong {
+		font-size: 1.1rem;
+		line-height: 1.1;
 	}
+
+	.identity-copy span {
+		font-size: 0.82rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+
+	.nav-links {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.38rem;
+		border-radius: 999px;
+		background: rgba(236, 243, 238, 0.96);
+		border: 1px solid rgba(103, 129, 114, 0.14);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 20px rgba(84, 110, 92, 0.05);
+	}
+
 	@media (max-width: 720px) {
-		nav {
-			padding: 0.7em 1em;
+		.header-shell {
+			border-radius: 28px;
+			padding: 0.85rem;
+			flex-direction: column;
+			align-items: stretch;
 		}
-		.social-links {
-			display: none;
+
+		.identity {
+			justify-content: center;
+		}
+
+		.nav-links {
+			justify-content: center;
 		}
 	}
 </style>

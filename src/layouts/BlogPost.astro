@@ -1,81 +1,205 @@
----
+﻿---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import type { CategorizedPost } from '../data/categories';
+import { toCategoryId } from '../data/categories';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	category: string;
+	categorySummary?: string;
+	relatedPosts?: CategorizedPost[];
+};
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const {
+	title,
+	description,
+	category,
+	pubDate,
+	updatedDate,
+	heroImage,
+	categorySummary = '',
+	relatedPosts = [],
+} = Astro.props;
 ---
 
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImage} />
 		<style>
 			main {
-				max-width: 680px;
+				width: min(calc(100% - 2rem), 1040px);
 			}
-			.article-header {
-				margin-bottom: 2.5em;
+
+			.article-shell {
+				display: grid;
+				gap: 1.25rem;
+				padding-top: 1rem;
 			}
-			.article-header h1 {
-				font-size: 2.2em;
-				line-height: 1.2;
-				margin-bottom: 0.5em;
+
+			.article-hero {
+				padding: 1.8rem;
+				display: grid;
+				gap: 1rem;
 			}
-			.article-meta {
+
+			.article-hero p {
+				max-width: 44rem;
+				font-size: 1.06rem;
+			}
+
+			.section-head {
+				display: grid;
+				gap: 0.8rem;
+			}
+
+			.meta-row {
 				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+			}
+
+			.meta-pill,
+			.category-pill,
+			.post-category {
+				display: inline-flex;
 				align-items: center;
-				gap: 0.8em;
-				color: var(--text-muted);
-				font-size: 0.9em;
+				gap: 0.45rem;
+				padding: 0.78rem 1rem;
+				border-radius: 999px;
+				background: rgba(248, 253, 249, 0.88);
+				border: 1px solid rgba(103, 129, 114, 0.15);
+				color: var(--ink-soft);
+				font-weight: 700;
+				box-shadow: var(--shadow-sm);
 			}
-			.article-meta .separator {
-				width: 3px;
-				height: 3px;
-				border-radius: 50%;
-				background: var(--text-muted);
-				opacity: 0.5;
+
+			.category-pill:hover,
+			.back-link:hover,
+			.related-card:hover {
+				transform: translateY(-2px);
+				background: white;
 			}
-			.hero-image {
-				margin-bottom: 2em;
+
+			.hero-media {
+				padding: 1rem;
 			}
-			.hero-image img {
+
+			.hero-media :global(img) {
 				width: 100%;
-				border-radius: var(--radius);
+				object-fit: cover;
+				border-radius: calc(var(--radius-xl) - 8px);
 			}
+
+			.article-body {
+				padding: clamp(1.4rem, 3vw, 2.8rem);
+				max-width: var(--content-width);
+				margin: 0 auto;
+			}
+
 			.prose {
-				color: var(--text-secondary);
+				display: grid;
+				gap: 1rem;
 			}
+
+			.prose :global(h2),
+			.prose :global(h3),
+			.prose :global(h4) {
+				scroll-margin-top: 6rem;
+			}
+
 			.prose :global(h2) {
-				color: var(--text-primary);
-				margin-top: 2.5em;
+				margin-top: 2rem;
 			}
-			.prose :global(h3) {
-				color: var(--text-primary);
-				margin-top: 2em;
+
+			.prose :global(p),
+			.prose :global(ul),
+			.prose :global(ol) {
+				max-width: 42rem;
 			}
-			.prose :global(p) {
-				margin-bottom: 1.5em;
-			}
-			.prose :global(strong) {
-				color: var(--text-primary);
-			}
+
 			.prose :global(a) {
-				color: var(--accent);
+				color: var(--accent-strong);
+				text-decoration: underline;
+				text-decoration-color: rgba(95, 141, 116, 0.3);
+				text-underline-offset: 0.18em;
 			}
+
 			.back-link {
-				display: inline-block;
-				margin-top: 3em;
-				padding: 0.5em 0;
-				font-size: 0.92em;
-				color: var(--text-muted);
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				margin-top: 1.25rem;
+				padding: 0.8rem 1rem;
+				border-radius: 999px;
+				background: rgba(250, 255, 251, 0.84);
+				border: 1px solid rgba(103, 129, 114, 0.14);
+				color: var(--ink-soft);
+				font-weight: 700;
 			}
-			.back-link:hover {
-				color: var(--accent);
+
+			.related-section {
+				padding: 1.6rem;
+				display: grid;
+				gap: 1rem;
+			}
+
+			.related-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.related-card {
+				display: grid;
+				gap: 0.7rem;
+				padding: 1.25rem;
+				background: rgba(248, 253, 249, 0.88);
+				border: 1px solid rgba(103, 129, 114, 0.15);
+				border-radius: var(--radius-lg);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.related-card h3 {
+				font-size: 1.2rem;
+				line-height: 1.18;
+			}
+
+			.post-meta {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.86rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				color: var(--ink-faint);
+			}
+
+			.post-meta::before {
+				content: "";
+				width: 0.45rem;
+				height: 0.45rem;
+				border-radius: 999px;
+				background: var(--accent-warm);
+			}
+
+			@media (max-width: 720px) {
+				main {
+					width: min(calc(100% - 1rem), 1040px);
+				}
+
+				.article-hero,
+				.hero-media,
+				.related-section {
+					padding: 1.2rem;
+				}
+
+				.related-grid {
+					grid-template-columns: 1fr;
+				}
 			}
 		</style>
 	</head>
@@ -83,29 +207,52 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 	<body>
 		<Header />
 		<main>
-			<article>
-				<div class="article-header">
+			<article class="article-shell">
+				<header class="article-hero soft-panel">
+					<span class="section-tag">文章</span>
 					<h1>{title}</h1>
-					<div class="article-meta">
-						<FormattedDate date={pubDate} />
-						{updatedDate && (
-							<>
-								<span class="separator"></span>
-								<span>更新于 <FormattedDate date={updatedDate} /></span>
-							</>
-						)}
+					<p>{description}</p>
+					<div class="meta-row">
+						<a class="category-pill" href={`${import.meta.env.BASE_URL}blog#${toCategoryId(category)}`}>{category}</a>
+						<span class="meta-pill"><FormattedDate date={pubDate} /></span>
+						{updatedDate && <span class="meta-pill">更新于 <FormattedDate date={updatedDate} /></span>}
 					</div>
-				</div>
+					{categorySummary && <p>{categorySummary}</p>}
+				</header>
+
 				{heroImage && (
-					<div class="hero-image">
-						<Image width={1020} height={510} src={heroImage} alt="" />
+					<div class="hero-media soft-panel">
+						<Image width={1400} height={800} src={heroImage} alt="" />
 					</div>
 				)}
-				<div class="prose">
-					<slot />
+
+				<div class="article-body soft-panel">
+					<div class="prose">
+						<slot />
+					</div>
+					<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">返回文章归档</a>
 				</div>
+
+				{relatedPosts.length > 0 && (
+					<section class="related-section soft-panel">
+						<div class="section-head">
+							<span class="section-tag">继续阅读</span>
+							<h2>接着看看这些文章</h2>
+							<p>如果这篇对你有帮助，可以顺着下面这些内容继续读下去。</p>
+						</div>
+						<div class="related-grid">
+							{relatedPosts.map((post) => (
+								<a class="related-card" href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+									<div class="post-category">{post.categoryName}</div>
+									<h3>{post.data.title}</h3>
+									<p>{post.data.description}</p>
+									<div class="post-meta"><FormattedDate date={post.data.pubDate} /></div>
+								</a>
+							))}
+						</div>
+					</section>
+				)}
 			</article>
-			<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">&larr; 返回文章列表</a>
 		</main>
 		<Footer />
 	</body>

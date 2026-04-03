@@ -1,168 +1,620 @@
----
+﻿---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getPostCategory, groupPostsByCategory, toCategoryId } from '../data/categories';
+import HeroImage from '../assets/spirited-princess.jpg';
 
 const baseURL = import.meta.env.BASE_URL;
-const recentPosts = (await getCollection('blog'))
+const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 3);
+	.map(getPostCategory);
+const featuredPost = posts[0];
+const recentPosts = posts.slice(1, 4);
+const writingTrail = posts.slice(0, 4);
+const categories = groupPostsByCategory(posts);
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} image={HeroImage} />
 		<style>
-			.intro {
-				margin-bottom: 3em;
-			}
-			.intro h1 {
-				margin-bottom: 0.6em;
-			}
-			.intro p {
-				font-size: 1.1em;
-				line-height: 1.8;
-			}
-			.intro .highlight {
-				color: var(--accent);
-				font-weight: 600;
+			.hero {
+				display: grid;
+				grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+				gap: 1.8rem;
+				align-items: start;
+				padding: 1.25rem 0 2.3rem;
 			}
 
-			/* 最新文章 */
-			.section-title {
-				font-size: 0.8em;
-				text-transform: uppercase;
-				letter-spacing: 0.1em;
-				color: var(--text-muted);
-				margin-bottom: 1.5em;
-				font-weight: 600;
-			}
-			.post-list {
-				display: flex;
-				flex-direction: column;
-				gap: 0;
-			}
-			.post-item {
-				display: flex;
-				align-items: baseline;
-				gap: 1em;
-				padding: 1em 0;
-				border-bottom: 1px solid var(--border);
-				text-decoration: none;
-				transition: background 0.2s ease;
-				margin: 0 -0.8em;
-				padding-left: 0.8em;
-				padding-right: 0.8em;
-				border-radius: 8px;
-				border-bottom: none;
-			}
-			.post-item:hover {
-				background: rgba(255, 255, 255, 0.03);
-			}
-			.post-item .post-title {
-				color: var(--text-primary);
-				font-weight: 600;
-				font-size: 1.05em;
-				line-height: 1.4;
-				flex: 1;
-			}
-			.post-item:hover .post-title {
-				color: var(--accent);
-			}
-			.post-item .post-date {
-				color: var(--text-muted);
-				font-size: 0.85em;
-				white-space: nowrap;
-				font-variant-numeric: tabular-nums;
-			}
-			.view-all {
-				display: inline-block;
-				margin-top: 1.5em;
-				font-size: 0.95em;
+			.hero-copy {
+				display: grid;
+				gap: 1rem;
+				padding: 0.35rem 0;
 			}
 
-			/* 理念 */
-			.beliefs {
-				margin-top: 3em;
+			.hero-intro {
+				display: grid;
+				gap: 0.9rem;
+				padding: 1.5rem;
 			}
-			.beliefs ul {
-				padding-left: 0;
-				list-style: none;
+
+			.hero-intro h1 {
+				max-width: 14ch;
+				font-size: clamp(2rem, 3.8vw, 3.15rem);
+				line-height: 1.18;
+				letter-spacing: -0.04em;
 			}
-			.beliefs li {
-				padding: 0.7em 0;
-				color: var(--text-secondary);
-				position: relative;
-				padding-left: 1.5em;
+
+			.hero-intro p {
+				max-width: 38rem;
+				font-size: 1.03rem;
 			}
-			.beliefs li::before {
-				content: "";
-				position: absolute;
-				left: 0;
-				top: 1.15em;
-				width: 6px;
-				height: 6px;
-				border-radius: 50%;
+
+			.hero-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.85rem;
+			}
+
+			.hero-actions a {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.98rem 1.35rem;
+				border-radius: 999px;
+				font-weight: 700;
+				border: 1px solid transparent;
+				box-shadow: var(--shadow-sm);
+			}
+
+			.hero-actions .primary {
 				background: var(--accent);
-				opacity: 0.5;
+				color: white;
+				box-shadow: 0 16px 35px rgba(105, 138, 120, 0.2);
 			}
-			.beliefs li:nth-child(2)::before { background: var(--pink); }
-			.beliefs li:nth-child(3)::before { background: var(--green); }
-			.beliefs li:nth-child(4)::before { background: var(--purple); }
 
-			.divider {
-				height: 1px;
-				background: var(--border);
-				margin: 3em 0;
+			.hero-actions .secondary {
+				background: rgba(252, 255, 253, 0.88);
+				border-color: rgba(103, 129, 114, 0.16);
+			}
+
+			.hero-actions a:hover {
+				transform: translateY(-2px);
+			}
+
+			.hero-outline {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 0.85rem;
+			}
+
+			.hero-outline-item {
+				display: grid;
+				gap: 0.7rem;
+				padding: 1.1rem;
+			}
+
+			.hero-outline-top {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.65rem;
+			}
+
+			.hero-outline-number {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 2rem;
+				height: 2rem;
+				border-radius: 999px;
+				background: rgba(105, 138, 120, 0.12);
+				border: 1px solid rgba(103, 129, 114, 0.14);
+				color: var(--accent-strong);
+				font-size: 0.86rem;
+				font-weight: 800;
+			}
+
+			.hero-outline-item strong {
+				font-size: 1rem;
+				line-height: 1.2;
+			}
+
+			.hero-outline-item p {
+				font-size: 0.95rem;
+			}
+
+			.quick-facts {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 0.9rem;
+			}
+
+			.quick-facts div {
+				padding: 1.05rem 1.15rem;
+				border-radius: 999px;
+				background: rgba(248, 253, 249, 0.9);
+				border: 1px solid rgba(103, 129, 114, 0.13);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.quick-facts dt {
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: var(--ink-faint);
+				margin-bottom: 0.35rem;
+			}
+
+			.quick-facts dd {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 600;
+				color: var(--ink);
+			}
+
+			.hero-visual {
+				padding: 1.1rem;
+				display: grid;
+				gap: 0.95rem;
+			}
+
+			.hero-visual :global(img) {
+				aspect-ratio: 1 / 1;
+				width: 100%;
+				object-fit: cover;
+				border-radius: calc(var(--radius-xl) - 8px);
+			}
+
+			.visual-copy {
+				display: grid;
+				gap: 0.65rem;
+				padding: 0.35rem 0.25rem 0.45rem;
+			}
+
+			.visual-copy h2 {
+				font-size: clamp(1.8rem, 3vw, 2.5rem);
+			}
+
+			.visual-tag {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: fit-content;
+				padding: 0.76rem 1rem;
+				border-radius: 999px;
+				background: rgba(105, 138, 120, 0.12);
+				border: 1px solid rgba(103, 129, 114, 0.12);
+				color: var(--accent-strong);
+				font-weight: 700;
+			}
+
+			.section-head {
+				display: grid;
+				gap: 0.8rem;
+				margin-bottom: 1.4rem;
+			}
+
+			.category-section,
+			.feature-section,
+			.focus-section,
+			.trail-section {
+				padding: 1.8rem;
+				margin-top: 1rem;
+			}
+
+			.category-cards {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.category-card,
+			.post-category {
+				display: inline-flex;
+				align-items: center;
+				width: fit-content;
+				padding: 0.82rem 1.05rem;
+				border-radius: 999px;
+				background: rgba(248, 253, 249, 0.88);
+				border: 1px solid rgba(103, 129, 114, 0.15);
+				color: var(--ink-soft);
+				font-size: 0.94rem;
+				font-weight: 700;
+				box-shadow: var(--shadow-sm);
+			}
+
+			.category-card {
+				display: grid;
+				gap: 0.95rem;
+				width: auto;
+				padding: 1.35rem;
+				border-radius: var(--radius-lg);
+				background: rgba(249, 255, 251, 0.9);
+				align-items: start;
+			}
+
+			.category-card:hover {
+				transform: translateY(-2px);
+				background: white;
+				box-shadow: var(--shadow-md);
+			}
+
+			.category-card-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.8rem;
+				flex-wrap: wrap;
+			}
+
+			.category-count {
+				color: var(--ink-faint);
+				font-size: 0.86rem;
+			}
+
+			.category-summary {
+				font-size: 1.04rem;
+				color: var(--ink);
+			}
+
+			.category-reader {
+				font-size: 0.96rem;
+			}
+
+			.category-latest {
+				display: grid;
+				gap: 0.35rem;
+				padding-top: 0.95rem;
+				border-top: 1px solid rgba(103, 129, 114, 0.12);
+			}
+
+			.category-latest span {
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: var(--ink-faint);
+			}
+
+			.category-latest strong {
+				font-size: 1rem;
+				line-height: 1.35;
+			}
+
+			.feature-layout {
+				display: grid;
+				grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+				gap: 1rem;
+			}
+
+			.featured-post {
+				display: grid;
+				gap: 0.9rem;
+				padding: 1.5rem;
+				background: linear-gradient(135deg, rgba(250, 255, 251, 0.88), rgba(231, 242, 235, 0.96));
+			}
+
+			.featured-post h3 {
+				font-size: clamp(1.6rem, 2.4vw, 2.5rem);
+				line-height: 1.06;
+			}
+
+			.post-meta {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.86rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				color: var(--ink-faint);
+			}
+
+			.post-meta::before {
+				content: "";
+				width: 0.45rem;
+				height: 0.45rem;
+				border-radius: 999px;
+				background: var(--accent-warm);
+			}
+
+			.side-posts {
+				display: grid;
+				gap: 0.9rem;
+			}
+
+			.side-posts a {
+				display: grid;
+				gap: 0.55rem;
+				padding: 1.15rem 1.2rem;
+				background: rgba(250, 255, 251, 0.84);
+				border: 1px solid rgba(103, 129, 114, 0.13);
+				border-radius: var(--radius-lg);
+			}
+
+			.side-posts a:hover,
+			.featured-post:hover,
+			.focus-card:hover,
+			.trail-card:hover {
+				transform: translateY(-4px);
+				box-shadow: var(--shadow-md);
+			}
+
+			.side-posts h3 {
+				font-size: 1.25rem;
+				line-height: 1.2;
+			}
+
+			.trail-grid {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.trail-card {
+				display: grid;
+				gap: 1rem;
+				padding: 1.25rem;
+				background: rgba(249, 255, 251, 0.9);
+			}
+
+			.trail-order {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 2.5rem;
+				height: 2.5rem;
+				border-radius: 999px;
+				background: rgba(105, 138, 120, 0.12);
+				border: 1px solid rgba(103, 129, 114, 0.14);
+				color: var(--accent-strong);
+				font-weight: 800;
+				font-size: 0.95rem;
+			}
+
+			.trail-body {
+				display: grid;
+				gap: 0.7rem;
+			}
+
+			.trail-body h3 {
+				font-size: 1.18rem;
+				line-height: 1.18;
+			}
+
+			.focus-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.focus-card {
+				padding: 1.3rem;
+				display: grid;
+				gap: 0.7rem;
+			}
+
+			.focus-card:nth-child(1) {
+				background: linear-gradient(180deg, rgba(250, 255, 251, 0.84), rgba(231, 242, 235, 0.98));
+			}
+
+			.focus-card:nth-child(2) {
+				background: linear-gradient(180deg, rgba(250, 255, 251, 0.84), rgba(241, 238, 225, 0.98));
+			}
+
+			.focus-card:nth-child(3) {
+				background: linear-gradient(180deg, rgba(250, 255, 251, 0.84), rgba(238, 244, 241, 0.96));
+			}
+
+			.focus-card span {
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: var(--ink-faint);
+			}
+
+			@media (max-width: 960px) {
+				.hero,
+				.feature-layout,
+				.category-cards,
+				.trail-grid,
+				.focus-grid,
+				.hero-outline {
+					grid-template-columns: 1fr;
+				}
+
+				.hero-intro h1 {
+					max-width: none;
+				}
+			}
+
+			@media (max-width: 720px) {
+				.category-section,
+				.feature-section,
+				.focus-section,
+				.trail-section,
+				.hero-intro {
+					padding: 1.2rem;
+				}
+
+				.quick-facts {
+					grid-template-columns: 1fr;
+				}
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<section class="intro">
-				<h1>Ship Fast, Think Deep.</h1>
-				<p>
-					我是一个在生产环境中成长起来的工程师，关注
-					<span class="highlight">系统设计</span>、
-					<span class="highlight">前端工程化</span>和
-					<span class="highlight">开发者体验</span>。
-					这个站点记录我在真实项目中的技术决策、架构思考和踩坑复盘。
-				</p>
-				<p>
-					不写入门教程，只聊那些文档里不会写的东西。
-				</p>
+			<section class="hero">
+				<div class="hero-copy">
+					<span class="section-tag">写给正在学习的你</span>
+					<div class="hero-intro soft-panel">
+						<p class="eyebrow">这里会慢慢积累问题、过程和答案</p>
+						<h1>把学习里的问题、拆解过程和真正有用的结论，慢慢写下来。</h1>
+						<p>
+							这里是 <strong>sonder</strong> 的个人学习博客。它不会只留下“最后的答案”，也会把中间走过的路、卡住的地方和后来想明白的过程一起留住。
+						</p>
+						<div class="hero-actions">
+							<a class="primary" href={`${baseURL}blog`}>进入文章归档</a>
+							<a class="secondary" href={`${baseURL}about`}>关于我</a>
+						</div>
+					</div>
+					<div class="hero-outline">
+						<div class="hero-outline-item card">
+							<div class="hero-outline-top">
+								<div class="hero-outline-number">01</div>
+								<strong>学习记录</strong>
+							</div>
+							<p>把一个知识点从“看懂”到“讲清楚”的过程真正留下来。</p>
+						</div>
+						<div class="hero-outline-item card">
+							<div class="hero-outline-top">
+								<div class="hero-outline-number">02</div>
+								<strong>实践复盘</strong>
+							</div>
+							<p>把踩坑、调试、取舍和最后为什么这样做写明白。</p>
+						</div>
+						<div class="hero-outline-item card">
+							<div class="hero-outline-top">
+								<div class="hero-outline-number">03</div>
+								<strong>阶段思考</strong>
+							</div>
+							<p>过一段时间再回头看，也能看见自己是怎么慢慢进步的。</p>
+						</div>
+					</div>
+					<dl class="quick-facts">
+						<div>
+							<dt>昵称</dt>
+							<dd>sonder</dd>
+						</div>
+						<div>
+							<dt>一句话</dt>
+							<dd>保持热爱，无限进步</dd>
+						</div>
+						<div>
+							<dt>内容方向</dt>
+							<dd>记录学习过程与代码实践</dd>
+						</div>
+						<div>
+							<dt>已发布</dt>
+							<dd>{posts.length} 篇文章</dd>
+						</div>
+					</dl>
+				</div>
+
+				<aside class="hero-visual soft-panel">
+					<Image src={HeroImage} alt="幽灵公主主题图" width={1200} height={1200} />
+					<div class="visual-copy">
+						<p class="eyebrow">首页的一点偏爱</p>
+						<h2>幽灵公主</h2>
+						<p>我把《幽灵公主》放在这里，是想给这个首页留一点安静但坚定的气质。学习很多时候并不轰烈，更像是慢慢积累、一步一步往前走。</p>
+						<div class="visual-tag">继续往前走</div>
+					</div>
+				</aside>
 			</section>
 
-			<div class="divider"></div>
-
-			<section>
-				<div class="section-title">最新文章</div>
-				<div class="post-list">
-					{recentPosts.map((post) => (
-						<a href={`${baseURL}blog/${post.id}/`} class="post-item">
-							<span class="post-title">{post.data.title}</span>
-							<span class="post-date"><FormattedDate date={post.data.pubDate} /></span>
+			<section class="category-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">分类浏览</span>
+					<h2>分类会跟着文件夹自动长出来</h2>
+					<p>以后你只需要在 <code>src/content/blog</code> 下面新建一个分类文件夹，再把文章放进去，这里就会自动按文件夹显示分类。</p>
+				</div>
+				<div class="category-cards">
+					{categories.map((category) => (
+						<a class="category-card card" href={`${baseURL}blog#${toCategoryId(category.name)}`}>
+							<div class="category-card-top">
+								<span class="post-category">{category.name}</span>
+								<span class="category-count">{category.count} 篇</span>
+							</div>
+							<p class="category-summary">{category.summary}</p>
+							<p class="category-reader">{category.readerHint}</p>
+							{category.latest && (
+								<div class="category-latest">
+									<span>最近更新</span>
+									<strong>{category.latest.data.title}</strong>
+								</div>
+							)}
 						</a>
 					))}
 				</div>
-				<a href={`${baseURL}blog`} class="view-all">查看全部文章 &rarr;</a>
 			</section>
 
-			<div class="divider"></div>
+			<section class="feature-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">最近更新</span>
+					<h2>第一次来，可以先看这里</h2>
+					<p>我把最近写的内容放在前面。它们更接近我现在的学习节奏，也更能代表这个博客正在慢慢形成的方向。</p>
+				</div>
+				<div class="feature-layout">
+					{featuredPost && (
+						<a class="featured-post card" href={`${baseURL}blog/${featuredPost.id}/`}>
+							<div class="post-meta"><FormattedDate date={featuredPost.data.pubDate} /></div>
+							<div class="post-category">{featuredPost.categoryName}</div>
+							<h3>{featuredPost.data.title}</h3>
+							<p>{featuredPost.data.description}</p>
+						</a>
+					)}
+					<div class="side-posts">
+						{recentPosts.map((post) => (
+							<a href={`${baseURL}blog/${post.id}/`}>
+								<div class="post-meta"><FormattedDate date={post.data.pubDate} /></div>
+								<div class="post-category">{post.categoryName}</div>
+								<h3>{post.data.title}</h3>
+								<p>{post.data.description}</p>
+							</a>
+						))}
+					</div>
+				</div>
+			</section>
 
-			<section class="beliefs">
-				<h2>我相信的几件事</h2>
-				<ul>
-					<li><strong>复杂度是敌人。</strong>如果一个方案 20 分钟讲不清楚，大概率不是最优解。</li>
-					<li><strong>可观测性 > 可扩展性。</strong>你无法优化看不见的东西。</li>
-					<li><strong>代码是写给人看的。</strong>六个月后的你会感谢现在的命名习惯。</li>
-					<li><strong>自动化是一种尊重。</strong>人不应该做机器擅长的事。</li>
-				</ul>
+			<section class="trail-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">阅读路线</span>
+					<h2>如果你想顺着看，可以从这里开始</h2>
+					<p>这几篇文章基本能把这个博客现在的内容轮廓勾出来。你可以按顺序看，也可以从自己最关心的主题先切进去。</p>
+				</div>
+				<div class="trail-grid">
+					{writingTrail.map((post, index) => (
+						<a class="trail-card card" href={`${baseURL}blog/${post.id}/`}>
+							<div class="trail-order">{String(index + 1).padStart(2, '0')}</div>
+							<div class="trail-body">
+								<div class="post-category">{post.categoryName}</div>
+								<h3>{post.data.title}</h3>
+								<p>{post.data.description}</p>
+								<div class="post-meta"><FormattedDate date={post.data.pubDate} /></div>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+
+			<section class="focus-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">长期更新的内容</span>
+					<h2>我会持续写这些主题</h2>
+				</div>
+				<div class="focus-grid">
+					<div class="focus-card card">
+						<span>学习记录</span>
+						<h3>把学习过程留下来</h3>
+						<p>从一个知识点听懂，到自己真正能讲清楚，中间的过程值得被记录。</p>
+					</div>
+					<div class="focus-card card">
+						<span>实践复盘</span>
+						<h3>把踩坑和实践写清楚</h3>
+						<p>不仅写结果，也写中间卡住的地方、查资料的路径，以及最后为什么这样做。</p>
+					</div>
+					<div class="focus-card card">
+						<span>阶段思考</span>
+						<h3>把成长变化慢慢看见</h3>
+						<p>一段时间后回头看，博客能帮我看到自己哪里真的进步了，哪里还没学透。</p>
+					</div>
+				</div>
 			</section>
 		</main>
 		<Footer />
