@@ -5,27 +5,13 @@ import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { groupPostsByCategory, toCategoryId } from '../../data/categories';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
-
-const categoryCounts = posts.reduce((map, post) => {
-	map.set(post.data.category, (map.get(post.data.category) ?? 0) + 1);
-	return map;
-}, new Map<string, number>());
-
-const categories = Array.from(categoryCounts.entries())
-	.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'))
-	.map(([name, count]) => ({
-		name,
-		count,
-		posts: posts.filter((post) => post.data.category === name),
-	}));
-
+const categories = groupPostsByCategory(posts);
 const baseURL = import.meta.env.BASE_URL;
-const toCategoryId = (category: string) =>
-	`category-${category.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\u4e00-\u9fa5-]/g, '')}`;
 ---
 
 <!doctype html>
@@ -42,6 +28,60 @@ const toCategoryId = (category: string) =>
 			.archive-hero p {
 				max-width: 44rem;
 				font-size: 1.04rem;
+			}
+
+			.archive-overview {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+				margin-bottom: 1rem;
+			}
+
+			.archive-card {
+				display: grid;
+				gap: 0.9rem;
+				padding: 1.35rem;
+				background: rgba(249, 255, 251, 0.9);
+			}
+
+			.archive-card:hover {
+				transform: translateY(-4px);
+				box-shadow: var(--shadow-md);
+			}
+
+			.archive-card-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.8rem;
+				flex-wrap: wrap;
+			}
+
+			.archive-card-summary {
+				font-size: 1rem;
+				color: var(--ink);
+			}
+
+			.archive-card-meta {
+				display: grid;
+				gap: 0.35rem;
+				padding-top: 0.9rem;
+				border-top: 1px solid rgba(103, 129, 114, 0.12);
+			}
+
+			.archive-card-meta span {
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: var(--ink-faint);
+			}
+
+			.category-nav-shell {
+				position: sticky;
+				top: 5.8rem;
+				z-index: 15;
+				padding: 0.95rem 1rem;
+				margin-bottom: 1rem;
 			}
 
 			.category-nav {
@@ -67,7 +107,8 @@ const toCategoryId = (category: string) =>
 				box-shadow: var(--shadow-sm);
 			}
 
-			.category-nav a:hover {
+			.category-nav a:hover,
+			.latest-link:hover {
 				transform: translateY(-2px);
 				background: white;
 			}
@@ -80,18 +121,49 @@ const toCategoryId = (category: string) =>
 			.category-section {
 				padding: 1.7rem;
 				margin-top: 1rem;
+				scroll-margin-top: 8rem;
+				transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+			}
+
+			.category-section:target {
+				border-color: rgba(105, 138, 120, 0.28);
+				box-shadow: var(--shadow-lg);
 			}
 
 			.category-head {
 				display: flex;
-				align-items: center;
+				align-items: start;
 				justify-content: space-between;
 				gap: 1rem;
 				margin-bottom: 1rem;
 			}
 
+			.category-copy {
+				display: grid;
+				gap: 0.75rem;
+				max-width: 42rem;
+			}
+
 			.category-head h2 {
 				font-size: clamp(1.8rem, 3vw, 2.8rem);
+			}
+
+			.category-meta {
+				display: grid;
+				gap: 0.75rem;
+				justify-items: end;
+			}
+
+			.latest-link {
+				display: inline-flex;
+				align-items: center;
+				padding: 0.8rem 1rem;
+				border-radius: 999px;
+				background: rgba(248, 253, 249, 0.88);
+				border: 1px solid rgba(103, 129, 114, 0.15);
+				color: var(--ink-soft);
+				font-weight: 700;
+				box-shadow: var(--shadow-sm);
 			}
 
 			.post-list {
@@ -140,14 +212,25 @@ const toCategoryId = (category: string) =>
 				line-height: 1;
 			}
 
+			@media (max-width: 960px) {
+				.archive-overview {
+					grid-template-columns: 1fr;
+				}
+			}
+
 			@media (max-width: 720px) {
-				.category-section {
+				.category-section,
+				.category-nav-shell {
 					padding: 1.2rem;
 				}
 
 				.category-head,
 				.post-item {
 					grid-template-columns: 1fr;
+				}
+
+				.category-meta {
+					justify-items: start;
 				}
 
 				.post-arrow {
@@ -161,8 +244,27 @@ const toCategoryId = (category: string) =>
 		<main>
 			<section class="archive-hero">
 				<span class="section-tag">分类归档</span>
-				<h1>按主题整理的文章</h1>
-				<p>如果你是带着某个问题来的，可以直接从分类进入；如果只是随便看看，也能很快知道这里主要在写什么。</p>
+				<h1>按文件夹整理的文章</h1>
+				<p>现在分类会直接跟着 <code>src/content/blog</code> 下面的文件夹结构变化。你新建一个文件夹、放进文章，这里就会自动出现对应分类。</p>
+			</section>
+
+			<section class="archive-overview">
+				{categories.map((category) => (
+					<a class="archive-card card" href={`#${toCategoryId(category.name)}`}>
+						<div class="archive-card-top">
+							<span class="post-category">{category.name}</span>
+							<span class="category-count">{category.count} 篇</span>
+						</div>
+						<p class="archive-card-summary">{category.summary}</p>
+						<div class="archive-card-meta">
+							<span>从这篇开始</span>
+							<strong>{category.latest?.data.title}</strong>
+						</div>
+					</a>
+				))}
+			</section>
+
+			<section class="category-nav-shell soft-panel">
 				<div class="category-nav">
 					{categories.map((category) => (
 						<a href={`#${toCategoryId(category.name)}`}>
@@ -176,8 +278,20 @@ const toCategoryId = (category: string) =>
 			{categories.map((category) => (
 				<section class="category-section soft-panel" id={toCategoryId(category.name)}>
 					<div class="category-head">
-						<h2>{category.name}</h2>
-						<div class="post-category">{category.count} 篇文章</div>
+						<div class="category-copy">
+							<div class="post-category">{category.name}</div>
+							<h2>{category.name}</h2>
+							<p>{category.summary}</p>
+						</div>
+						<div class="category-meta">
+							<div class="post-category">{category.count} 篇文章</div>
+							<div>{category.readerHint}</div>
+							{category.latest && (
+								<a class="latest-link" href={`${baseURL}blog/${category.latest.id}/`}>
+									最近更新：{category.latest.data.title}
+								</a>
+							)}
+						</div>
 					</div>
 					<div class="post-list">
 						{category.posts.map((post) => (

@@ -5,12 +5,25 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import type { CategorizedPost } from '../data/categories';
+import { toCategoryId } from '../data/categories';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	category: string;
+	categorySummary?: string;
+	relatedPosts?: CategorizedPost[];
+};
 
-const { title, description, category, pubDate, updatedDate, heroImage } = Astro.props;
-const toCategoryId = (value: string) =>
-	`category-${value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\u4e00-\u9fa5-]/g, '')}`;
+const {
+	title,
+	description,
+	category,
+	pubDate,
+	updatedDate,
+	heroImage,
+	categorySummary = '',
+	relatedPosts = [],
+} = Astro.props;
 ---
 
 <html lang="zh-CN">
@@ -38,6 +51,11 @@ const toCategoryId = (value: string) =>
 				font-size: 1.06rem;
 			}
 
+			.section-head {
+				display: grid;
+				gap: 0.8rem;
+			}
+
 			.meta-row {
 				display: flex;
 				flex-wrap: wrap;
@@ -45,7 +63,8 @@ const toCategoryId = (value: string) =>
 			}
 
 			.meta-pill,
-			.category-pill {
+			.category-pill,
+			.post-category {
 				display: inline-flex;
 				align-items: center;
 				gap: 0.45rem;
@@ -58,7 +77,9 @@ const toCategoryId = (value: string) =>
 				box-shadow: var(--shadow-sm);
 			}
 
-			.category-pill:hover {
+			.category-pill:hover,
+			.back-link:hover,
+			.related-card:hover {
 				transform: translateY(-2px);
 				background: white;
 			}
@@ -120,9 +141,49 @@ const toCategoryId = (value: string) =>
 				font-weight: 700;
 			}
 
-			.back-link:hover {
-				transform: translateY(-2px);
-				background: white;
+			.related-section {
+				padding: 1.6rem;
+				display: grid;
+				gap: 1rem;
+			}
+
+			.related-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 1rem;
+			}
+
+			.related-card {
+				display: grid;
+				gap: 0.7rem;
+				padding: 1.25rem;
+				background: rgba(248, 253, 249, 0.88);
+				border: 1px solid rgba(103, 129, 114, 0.15);
+				border-radius: var(--radius-lg);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.related-card h3 {
+				font-size: 1.2rem;
+				line-height: 1.18;
+			}
+
+			.post-meta {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.86rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				color: var(--ink-faint);
+			}
+
+			.post-meta::before {
+				content: "";
+				width: 0.45rem;
+				height: 0.45rem;
+				border-radius: 999px;
+				background: var(--accent-warm);
 			}
 
 			@media (max-width: 720px) {
@@ -131,8 +192,13 @@ const toCategoryId = (value: string) =>
 				}
 
 				.article-hero,
-				.hero-media {
+				.hero-media,
+				.related-section {
 					padding: 1.2rem;
+				}
+
+				.related-grid {
+					grid-template-columns: 1fr;
 				}
 			}
 		</style>
@@ -151,6 +217,7 @@ const toCategoryId = (value: string) =>
 						<span class="meta-pill"><FormattedDate date={pubDate} /></span>
 						{updatedDate && <span class="meta-pill">更新于 <FormattedDate date={updatedDate} /></span>}
 					</div>
+					{categorySummary && <p>{categorySummary}</p>}
 				</header>
 
 				{heroImage && (
@@ -165,6 +232,26 @@ const toCategoryId = (value: string) =>
 					</div>
 					<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">返回文章归档</a>
 				</div>
+
+				{relatedPosts.length > 0 && (
+					<section class="related-section soft-panel">
+						<div class="section-head">
+							<span class="section-tag">继续阅读</span>
+							<h2>接着看看这些文章</h2>
+							<p>如果这篇对你有帮助，可以顺着下面这些内容继续读下去。</p>
+						</div>
+						<div class="related-grid">
+							{relatedPosts.map((post) => (
+								<a class="related-card" href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
+									<div class="post-category">{post.categoryName}</div>
+									<h3>{post.data.title}</h3>
+									<p>{post.data.description}</p>
+									<div class="post-meta"><FormattedDate date={post.data.pubDate} /></div>
+								</a>
+							))}
+						</div>
+					</section>
+				)}
 			</article>
 		</main>
 		<Footer />
