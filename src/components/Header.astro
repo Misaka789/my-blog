@@ -16,13 +16,19 @@ const baseURL = import.meta.env.BASE_URL;
 				<strong>{SITE_TITLE}</strong>
 			</div>
 		</a>
+		<div class="header-extras">
+			<slot />
+		</div>
 		<nav class="nav-links" aria-label="Primary">
 			<HeaderLink href={baseURL}>首页</HeaderLink>
 			<HeaderLink href={`${baseURL}blog`}>文章</HeaderLink>
 			<HeaderLink href={`${baseURL}about`}>关于</HeaderLink>
-			<button type="button" class="theme-toggle" aria-label="切换夜间模式" data-theme-toggle>
-				<span class="theme-light">昼</span>
-				<span class="theme-dark">夜</span>
+			<button type="button" class="theme-toggle" aria-label="切换明暗主题" aria-pressed="false" data-theme-toggle>
+				<span class="theme-toggle-track" aria-hidden="true">
+					<span class="theme-toggle-sun">☼</span>
+					<span class="theme-toggle-moon">☾</span>
+					<span class="theme-toggle-thumb"></span>
+				</span>
 			</button>
 		</nav>
 	</div>
@@ -51,6 +57,14 @@ const baseURL = import.meta.env.BASE_URL;
 		background: rgba(255, 252, 247, 0.84);
 		border: 1px solid var(--line);
 		box-shadow: var(--shadow-sm);
+	}
+
+	.header-extras {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
 	}
 
 	.identity {
@@ -100,22 +114,114 @@ const baseURL = import.meta.env.BASE_URL;
 	.theme-toggle {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding: 0.68rem 0.82rem;
+		justify-content: center;
+		width: 3.9rem;
+		height: 3rem;
+		padding: 0;
 		border-radius: 999px;
 		border: 1px solid transparent;
 		background: transparent;
 		color: var(--ink-soft);
 		font: inherit;
-		font-size: 0.82rem;
-		font-weight: 700;
 		cursor: pointer;
 	}
 
 	.theme-toggle:hover {
-		color: var(--ink);
 		background: rgba(255, 255, 255, 0.82);
 		border-color: var(--line);
+	}
+
+	.theme-toggle-track {
+		position: relative;
+		display: inline-block;
+		width: 3.15rem;
+		height: 1.8rem;
+		border-radius: 999px;
+		background: linear-gradient(90deg, rgba(239, 180, 126, 0.2), rgba(93, 154, 121, 0.16));
+		border: 1px solid rgba(100, 132, 114, 0.14);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+		overflow: hidden;
+	}
+
+	.theme-toggle-sun,
+	.theme-toggle-moon {
+		position: absolute;
+		top: 50%;
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.8rem;
+		height: 0.8rem;
+		font-size: 0.74rem;
+		line-height: 1;
+		transition:
+			opacity var(--transition),
+			transform var(--transition),
+			color var(--transition);
+		transform: translateY(-50%);
+	}
+
+	.theme-toggle-sun {
+		left: 0.38rem;
+		color: #b56e2e;
+	}
+
+	.theme-toggle-moon {
+		right: 0.38rem;
+		color: #47715d;
+	}
+
+	.theme-toggle-thumb {
+		position: absolute;
+		top: 0.13rem;
+		left: 0.14rem;
+		width: 1.3rem;
+		height: 1.3rem;
+		border-radius: 999px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 246, 0.92));
+		box-shadow:
+			0 8px 18px rgba(43, 38, 30, 0.14),
+			inset 0 1px 0 rgba(255, 255, 255, 0.8);
+		transition:
+			transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			background var(--transition),
+			box-shadow var(--transition);
+	}
+
+	html[data-theme="dark"] .theme-toggle-track {
+		background: linear-gradient(90deg, rgba(21, 34, 28, 0.96), rgba(30, 45, 37, 0.94));
+		border-color: rgba(141, 172, 151, 0.18);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	}
+
+	html[data-theme="dark"] .theme-toggle-thumb {
+		transform: translateX(1.55rem);
+		background: linear-gradient(180deg, rgba(132, 153, 139, 0.96), rgba(86, 107, 94, 0.96));
+		box-shadow:
+			0 8px 18px rgba(0, 0, 0, 0.28),
+			inset 0 1px 0 rgba(255, 255, 255, 0.12);
+	}
+
+	html[data-theme="dark"] .theme-toggle-sun {
+		opacity: 0.45;
+		transform: translateY(-50%) scale(0.92);
+	}
+
+	html[data-theme="dark"] .theme-toggle-moon {
+		opacity: 1;
+		transform: translateY(-50%);
+		color: #dceae0;
+	}
+
+	html:not([data-theme="dark"]) .theme-toggle-sun {
+		opacity: 1;
+		transform: translateY(-50%);
+	}
+
+	html:not([data-theme="dark"]) .theme-toggle-moon {
+		opacity: 0.45;
+		transform: translateY(-50%) scale(0.92);
 	}
 
 	@media (max-width: 720px) {
@@ -127,6 +233,10 @@ const baseURL = import.meta.env.BASE_URL;
 		}
 
 		.identity {
+			justify-content: center;
+		}
+
+		.header-extras {
 			justify-content: center;
 		}
 
@@ -155,8 +265,13 @@ const baseURL = import.meta.env.BASE_URL;
 	const applyTheme = (theme) => {
 		root.dataset.theme = theme;
 		localStorage.setItem('sonder-theme', theme);
+		toggle?.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
 		window.dispatchEvent(new CustomEvent('sonder:theme-change', { detail: { theme } }));
 	};
+
+	if (toggle) {
+		toggle.setAttribute('aria-pressed', root.dataset.theme === 'dark' ? 'true' : 'false');
+	}
 
 	toggle?.addEventListener('click', () => {
 		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';

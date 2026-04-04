@@ -49,57 +49,72 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.progress {
-				position: fixed;
-				top: 1rem;
-				right: 1rem;
-				left: auto;
+				position: relative;
 				display: grid;
-				gap: 0.7rem;
-				width: min(320px, calc(100vw - 2rem));
-				padding: 0.95rem 1rem;
-				border-radius: 20px;
+				gap: 0.55rem;
+				width: min(100%, 320px);
+				padding: 0.72rem 0.82rem;
+				border-radius: 18px;
 				background: rgba(255, 252, 247, 0.84);
 				border: 1px solid rgba(116, 108, 94, 0.14);
-				box-shadow: 0 22px 44px rgba(43, 38, 30, 0.12);
+				box-shadow: 0 10px 24px rgba(43, 38, 30, 0.08);
 				backdrop-filter: blur(18px);
-				z-index: 95;
-				opacity: 0;
-				transform: translateY(-10px) scale(0.98);
 				transition:
-					opacity 260ms var(--transition),
-					transform 260ms var(--transition),
-					box-shadow 260ms var(--transition);
-			}
-
-			.progress.ready,
-			.progress.engaged {
-				opacity: 1;
-				transform: translateY(0) scale(1);
+					box-shadow 260ms var(--transition),
+					opacity 220ms var(--transition),
+					transform 220ms var(--transition),
+					max-height 220ms var(--transition),
+					padding 220ms var(--transition);
 			}
 
 			.progress.engaged {
-				box-shadow: 0 26px 56px rgba(43, 38, 30, 0.16);
+				box-shadow: 0 14px 30px rgba(43, 38, 30, 0.12);
 			}
 
 			.progress-topline {
 				display: flex;
-				align-items: baseline;
+				align-items: center;
 				justify-content: space-between;
 				gap: 1rem;
 			}
 
 			.progress-label {
-				font-size: 0.72rem;
+				font-size: 0.68rem;
 				font-weight: 800;
-				letter-spacing: 0.14em;
+				letter-spacing: 0.12em;
 				text-transform: uppercase;
 				color: var(--ink-faint);
 			}
 
 			.progress-badge {
-				font-size: 1.1rem;
+				font-size: 0.92rem;
 				font-weight: 800;
 				letter-spacing: -0.04em;
+				color: var(--ink);
+			}
+
+			.progress-toggle {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.34rem 0.56rem;
+				border-radius: 999px;
+				border: 0;
+				background: rgba(93, 154, 121, 0.08);
+				color: var(--ink-faint);
+				font: inherit;
+				font-size: 0.72rem;
+				font-weight: 700;
+				cursor: pointer;
+				transition:
+					transform var(--transition),
+					background-color var(--transition),
+					color var(--transition);
+			}
+
+			.progress-toggle:hover {
+				transform: translateY(-1px);
+				background: rgba(93, 154, 121, 0.14);
 				color: var(--ink);
 			}
 
@@ -136,7 +151,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.progress-section-title {
 				display: block;
-				font-size: 0.92rem;
+				font-size: 0.84rem;
 				font-weight: 700;
 				line-height: 1.3;
 				color: var(--ink);
@@ -147,8 +162,8 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.progress-section-subtitle {
 				display: block;
-				margin-top: 0.16rem;
-				font-size: 0.76rem;
+				margin-top: 0.1rem;
+				font-size: 0.72rem;
 				color: var(--ink-faint);
 			}
 
@@ -156,13 +171,26 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				padding: 0.5rem 0.72rem;
+				padding: 0.42rem 0.62rem;
 				border-radius: 999px;
 				background: rgba(29, 41, 34, 0.88);
 				color: white;
-				font-size: 0.75rem;
+				font-size: 0.7rem;
 				font-weight: 700;
 				letter-spacing: 0.03em;
+			}
+
+			.progress.collapsed {
+				gap: 0;
+				max-height: 3.2rem;
+				overflow: hidden;
+			}
+
+			.progress.collapsed .progress-track,
+			.progress.collapsed .progress-meta {
+				opacity: 0;
+				transform: translateY(-6px);
+				pointer-events: none;
 			}
 
 			.article-shell {
@@ -181,18 +209,18 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.article-hero {
 				display: grid;
-				gap: 0.9rem;
+				gap: 0.95rem;
 			}
 
 			.article-hero h1 {
-				max-width: 18ch;
+				max-width: 14ch;
 				font-size: clamp(2rem, 3.4vw, 3rem);
 				line-height: 1.04;
 				letter-spacing: -0.045em;
 			}
 
 			.article-hero p {
-				max-width: 38rem;
+				max-width: 44rem;
 				font-size: 0.98rem;
 			}
 
@@ -263,6 +291,8 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.article-body {
+				display: grid;
+				justify-content: center;
 				background: rgba(255, 253, 249, 0.96);
 				border-radius: 16px;
 				border: 1px solid rgba(116, 108, 94, 0.12);
@@ -271,6 +301,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.prose {
 				display: grid;
+				width: min(100%, 42rem);
 				gap: 1.15rem;
 				font-size: 1.04rem;
 				line-height: 1.95;
@@ -359,11 +390,11 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				font-weight: 700;
 			}
 
-			.prose :global(pre) {
+			.prose :global(pre:not(.mermaid)) {
 				position: relative;
 				max-width: 100%;
-				margin: 1.6rem 0;
-				padding: 2.2rem 1.25rem 1.2rem;
+				margin: 0;
+				padding: 1rem 1.25rem 1.1rem;
 				border-radius: 16px;
 				background:
 					linear-gradient(180deg, rgba(18, 29, 23, 0.98), rgba(18, 29, 23, 0.94)),
@@ -375,28 +406,24 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.prose :global(.code-block) {
-				position: relative;
+				display: grid;
+				gap: 0.65rem;
 				max-width: 100%;
 				margin: 1.6rem 0;
 			}
 
 			.prose :global(.code-toolbar) {
-				position: absolute;
-				top: 0.9rem;
-				right: 0.95rem;
-				left: 4rem;
-				z-index: 2;
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
 				gap: 0.75rem;
-				pointer-events: none;
+				flex-wrap: wrap;
+				padding: 0 0.15rem;
 			}
 
 			.prose :global(.code-language) {
 				display: inline-flex;
 				align-items: center;
-				min-width: 0;
 				padding: 0.3rem 0.56rem;
 				border-radius: 999px;
 				background: rgba(239, 247, 242, 0.1);
@@ -409,7 +436,6 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.prose :global(.code-copy) {
-				pointer-events: auto;
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
@@ -435,7 +461,6 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.prose :global(.code-expand) {
-				pointer-events: auto;
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
@@ -466,6 +491,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				gap: 0.5rem;
 				flex-wrap: wrap;
 				justify-content: flex-end;
+				margin-left: auto;
 			}
 
 			.prose :global(.code-block.collapsed pre) {
@@ -484,40 +510,26 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				pointer-events: none;
 			}
 
-			.prose :global(.mermaid-block) {
+			.prose :global(pre.mermaid) {
 				position: relative;
+				display: block;
+				width: auto;
 				max-width: 100%;
-				margin: 1.8rem 0;
-				padding: 1.25rem 1.25rem 1rem;
+				margin: 1.6rem 0;
+				padding: 1rem 1.1rem;
+				overflow-x: auto;
 				border-radius: 18px;
-				background:
-					linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 252, 249, 0.92));
+				background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 252, 249, 0.92));
 				border: 1px solid rgba(93, 154, 121, 0.14);
 				box-shadow: 0 14px 32px rgba(43, 38, 30, 0.08);
-				overflow: hidden;
+				white-space: normal;
 			}
 
-			.prose :global(.mermaid-block::before) {
-				content: '';
-				position: absolute;
-				inset: 0 auto auto 0;
-				width: 100%;
-				height: 3px;
-				background: linear-gradient(90deg, var(--accent-warm), var(--accent));
-				opacity: 0.9;
-			}
-
-			.prose :global(.mermaid-toolbar) {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 0.75rem;
-				margin-bottom: 0.85rem;
-			}
-
-			.prose :global(.mermaid-label) {
+			.prose :global(pre.mermaid)::before {
+				content: 'Mermaid';
 				display: inline-flex;
 				align-items: center;
+				margin-bottom: 0.95rem;
 				padding: 0.34rem 0.62rem;
 				border-radius: 999px;
 				background: rgba(93, 154, 121, 0.1);
@@ -529,81 +541,22 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				text-transform: uppercase;
 			}
 
-			.prose :global(.mermaid-actions) {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-				flex-wrap: wrap;
-				justify-content: flex-end;
-			}
-
-			.prose :global(.mermaid-copy),
-			.prose :global(.mermaid-toggle) {
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				padding: 0.34rem 0.62rem;
-				border-radius: 999px;
-				border: 1px solid rgba(93, 154, 121, 0.12);
-				background: rgba(255, 255, 255, 0.78);
-				color: var(--ink-soft);
-				font-size: 0.72rem;
-				font-weight: 700;
-				cursor: pointer;
-				transition:
-					transform var(--transition),
-					background-color var(--transition),
-					border-color var(--transition),
-					color var(--transition);
-			}
-
-			.prose :global(.mermaid-copy:hover),
-			.prose :global(.mermaid-toggle:hover) {
-				transform: translateY(-1px);
-				background: white;
-				color: var(--ink);
-			}
-
-			.prose :global(.mermaid-stage) {
-				overflow-x: auto;
-				padding: 0.4rem 0.15rem 0.2rem;
-			}
-
-			.prose :global(.mermaid-stage svg) {
+			.prose :global(pre.mermaid svg) {
+				display: block;
+				width: auto !important;
 				max-width: 100%;
 				height: auto;
-				margin: 0 auto;
-			}
-
-			.prose :global(.mermaid-source) {
-				margin-top: 0.85rem;
-				padding-top: 0.85rem;
-				border-top: 1px solid rgba(93, 154, 121, 0.12);
-			}
-
-			.prose :global(.mermaid-source[hidden]) {
-				display: none;
-			}
-
-			.prose :global(.mermaid-source pre) {
 				margin: 0;
 			}
 
-			.prose :global(pre)::before {
-				content: '';
-				position: absolute;
-				top: 0.95rem;
-				left: 1rem;
-				width: 0.68rem;
-				height: 0.68rem;
-				border-radius: 999px;
-				background: #f06d6d;
-				box-shadow:
-					1rem 0 0 #f1be55,
-					2rem 0 0 #69c27d;
+			.prose :global(pre.mermaid[data-render-error='true']) {
+				padding-bottom: 1.1rem;
+				color: var(--ink-soft);
+				font-size: 0.94rem;
+				line-height: 1.8;
 			}
 
-			.prose :global(pre code) {
+			.prose :global(pre:not(.mermaid) code) {
 				display: block;
 				color: rgba(239, 247, 242, 0.92);
 				font-size: 0.92rem;
@@ -718,6 +671,11 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				border: 1px solid rgba(141, 172, 151, 0.14);
 			}
 
+			html[data-theme='dark'] .progress-toggle {
+				background: rgba(237, 246, 239, 0.08);
+				color: var(--ink-faint);
+			}
+
 			html[data-theme='dark'] .prose :global(blockquote) {
 				background: linear-gradient(180deg, rgba(38, 29, 21, 0.68), rgba(18, 29, 23, 0.86));
 				border-color: rgba(239, 180, 126, 0.16);
@@ -737,26 +695,15 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				background: rgba(120, 195, 151, 0.1);
 			}
 
-			html[data-theme='dark'] .prose :global(.mermaid-block) {
+			html[data-theme='dark'] .prose :global(pre.mermaid) {
 				background: linear-gradient(180deg, rgba(18, 29, 23, 0.96), rgba(16, 24, 20, 0.94));
 				border-color: rgba(141, 172, 151, 0.18);
 			}
 
-			html[data-theme='dark'] .prose :global(.mermaid-label) {
+			html[data-theme='dark'] .prose :global(pre.mermaid)::before {
 				background: rgba(120, 195, 151, 0.12);
 				border-color: rgba(141, 172, 151, 0.16);
 				color: var(--accent-strong);
-			}
-
-			html[data-theme='dark'] .prose :global(.mermaid-copy),
-			html[data-theme='dark'] .prose :global(.mermaid-toggle) {
-				background: rgba(237, 246, 239, 0.08);
-				border-color: rgba(141, 172, 151, 0.14);
-				color: var(--ink);
-			}
-
-			html[data-theme='dark'] .prose :global(.mermaid-source) {
-				border-top-color: rgba(141, 172, 151, 0.14);
 			}
 
 			html[data-theme='dark'] .toc-list::before {
@@ -926,13 +873,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				}
 
 				.progress {
-					top: auto;
-					right: 0.75rem;
-					bottom: 0.75rem;
-					width: min(100%, calc(100vw - 1.5rem));
-					padding: 0.78rem 0.85rem;
-					gap: 0.55rem;
-					border-radius: 18px;
+					width: 100%;
 				}
 
 				.article-hero,
@@ -945,6 +886,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 				.article-hero h1 {
 					font-size: clamp(1.75rem, 8vw, 2.35rem);
+					max-width: none;
 				}
 
 				.meta-row {
@@ -967,12 +909,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 					margin-top: 2rem;
 				}
 
-				.progress-badge {
-					font-size: 1rem;
-				}
-
 				.prose :global(.code-toolbar) {
-					left: 3.9rem;
 					right: 0.85rem;
 					gap: 0.5rem;
 				}
@@ -983,33 +920,33 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				}
 
 				.progress-section-title {
-					font-size: 0.84rem;
-				}
-
-				.progress-chip {
-					padding: 0.42rem 0.6rem;
+					font-size: 0.8rem;
 				}
 			}
 		</style>
 	</head>
 	<body>
-		<div class="progress" aria-live="polite">
-			<div class="progress-topline">
-				<span class="progress-label">阅读进度</span>
-				<span class="progress-badge" data-progress-badge>0%</span>
-			</div>
-			<div class="progress-track" aria-hidden="true">
-				<div class="progress-fill"></div>
-			</div>
-			<div class="progress-meta">
-				<div class="progress-section">
-					<span class="progress-section-title" data-progress-section>正在阅读正文</span>
-					<span class="progress-section-subtitle" data-progress-subtitle>跟着当前章节继续往下读</span>
+		<Header>
+			<div class="progress collapsed" aria-live="polite" data-reading-time={readingTime}>
+				<div class="progress-topline">
+					<span class="progress-label">阅读进度</span>
+					<div style="display:flex;align-items:center;gap:.45rem;">
+						<span class="progress-badge" data-progress-badge>0%</span>
+						<button class="progress-toggle" type="button" aria-label="切换阅读进度显示" data-progress-toggle>展开</button>
+					</div>
 				</div>
-				<span class="progress-chip" data-progress-eta>剩余约 {readingTime} 分钟</span>
+				<div class="progress-track" aria-hidden="true">
+					<div class="progress-fill"></div>
+				</div>
+				<div class="progress-meta">
+					<div class="progress-section">
+						<span class="progress-section-title" data-progress-section>正在阅读正文</span>
+						<span class="progress-section-subtitle" data-progress-subtitle>跟着当前章节继续往下读</span>
+					</div>
+					<span class="progress-chip" data-progress-eta>剩余约 {readingTime} 分钟</span>
+				</div>
 			</div>
-		</div>
-		<Header />
+		</Header>
 		<main>
 			<article class="article-shell">
 				<header class="article-hero soft-panel">
@@ -1081,6 +1018,8 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			<img alt="" data-lightbox-image />
 		</div>
 		<script>
+			import mermaid from 'mermaid';
+
 			const copyButton = document.querySelector('[data-copy-link]');
 			if (copyButton) {
 				copyButton.addEventListener('click', async () => {
@@ -1095,13 +1034,17 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			const progress = document.querySelector('.progress');
 			const progressBadge = document.querySelector('[data-progress-badge]');
+			const progressToggle = document.querySelector('[data-progress-toggle]');
 			const progressSection = document.querySelector('[data-progress-section]');
 			const progressSubtitle = document.querySelector('[data-progress-subtitle]');
 			const progressEta = document.querySelector('[data-progress-eta]');
 			const articleBody = document.querySelector('.article-body');
 			const contentHeadings = Array.from(document.querySelectorAll('.prose h2, .prose h3'));
 
-			const totalReadingMinutes = Math.max(1, Number.parseInt(`${readingTime}`, 10) || 1);
+			const totalReadingMinutes = Math.max(
+				1,
+				Number.parseInt(progress?.getAttribute('data-reading-time') || '1', 10) || 1,
+			);
 			const updateCurrentSection = () => {
 				if (!progressSection || !progressSubtitle) return;
 
@@ -1133,7 +1076,6 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				const ratio = max <= 0 ? 0 : Math.min(1, Math.max(0, scrollTop / max));
 				const percent = `${Math.round(ratio * 100)}%`;
 				progress.style.setProperty('--progress', `${(ratio * 100).toFixed(2)}%`);
-				progress.classList.add('ready');
 				progress.classList.toggle('engaged', ratio > 0.03);
 				if (progressBadge) progressBadge.textContent = percent;
 				if (progressEta) {
@@ -1145,6 +1087,12 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			window.addEventListener('scroll', updateProgress, { passive: true });
 			window.addEventListener('resize', updateProgress);
 			updateProgress();
+
+			progressToggle?.addEventListener('click', () => {
+				if (!progress) return;
+				const collapsed = progress.classList.toggle('collapsed');
+				progressToggle.textContent = collapsed ? '展开' : '收起';
+			});
 
 			const tocLinks = Array.from(document.querySelectorAll('[data-toc-link]'));
 			const tocList = document.querySelector('.toc-list');
@@ -1228,128 +1176,63 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				return labels[normalized] || rawLanguage.toUpperCase();
 			};
 
-			const mermaidCodeBlocks = Array.from(document.querySelectorAll('.prose pre code.language-mermaid'));
-			const setupMermaid = async () => {
-				if (mermaidCodeBlocks.length === 0) return;
+			const mermaidBlocks = Array.from(document.querySelectorAll('.prose pre.mermaid'));
+			let mermaidReady = false;
+			const renderMermaid = async () => {
+				if (mermaidBlocks.length === 0) return;
+
+				if (!mermaidReady) {
+					mermaid.initialize({
+						startOnLoad: false,
+						theme: 'default',
+						securityLevel: 'loose',
+					});
+					mermaidReady = true;
+				}
+
+				for (const block of mermaidBlocks) {
+					block.dataset.mermaidSource ||= block.textContent || '';
+					block.innerHTML = block.dataset.mermaidSource;
+					block.removeAttribute('data-processed');
+					block.removeAttribute('data-render-error');
+				}
 
 				try {
-					const mermaidModule = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
-					const mermaid = mermaidModule.default;
-					const mermaidCards = [];
+					await mermaid.run({ nodes: mermaidBlocks });
+					for (const block of mermaidBlocks) {
+						const svg = block.querySelector('svg');
+						const viewBox = svg?.getAttribute('viewBox')?.split(/\s+/).map(Number);
+						const proseWidth = block.parentElement?.clientWidth || 704;
+						const minWidth = Math.min(360, proseWidth);
+						const fallbackWidth = Math.min(Math.max(proseWidth * 0.72, minWidth), proseWidth);
 
-					for (const code of mermaidCodeBlocks) {
-						const pre = code.closest('pre');
-						if (!pre) continue;
-
-						const source = code.textContent || '';
-						const card = document.createElement('div');
-						card.className = 'mermaid-block';
-
-						const toolbar = document.createElement('div');
-						toolbar.className = 'mermaid-toolbar';
-
-						const label = document.createElement('span');
-						label.className = 'mermaid-label';
-						label.textContent = 'Mermaid';
-
-						const actions = document.createElement('div');
-						actions.className = 'mermaid-actions';
-
-						const copySourceButton = document.createElement('button');
-						copySourceButton.className = 'mermaid-copy';
-						copySourceButton.type = 'button';
-						copySourceButton.textContent = '复制源码';
-
-						const toggleSourceButton = document.createElement('button');
-						toggleSourceButton.className = 'mermaid-toggle';
-						toggleSourceButton.type = 'button';
-						toggleSourceButton.textContent = '查看源码';
-
-						const stage = document.createElement('div');
-						stage.className = 'mermaid-stage';
-
-						const sourceWrap = document.createElement('div');
-						sourceWrap.className = 'mermaid-source';
-						sourceWrap.hidden = true;
-
-						const sourcePre = pre.cloneNode(true);
-						sourceWrap.appendChild(sourcePre);
-
-						copySourceButton.addEventListener('click', async () => {
-							try {
-								await navigator.clipboard.writeText(source);
-								copySourceButton.textContent = '已复制';
-								window.showToast?.('Mermaid 源码已复制');
-								window.setTimeout(() => {
-									copySourceButton.textContent = '复制源码';
-								}, 1800);
-							} catch {
-								copySourceButton.textContent = '复制失败';
-								window.setTimeout(() => {
-									copySourceButton.textContent = '复制源码';
-								}, 1800);
-								window.showToast?.('复制失败');
-							}
-						});
-
-						toggleSourceButton.addEventListener('click', () => {
-							sourceWrap.hidden = !sourceWrap.hidden;
-							toggleSourceButton.textContent = sourceWrap.hidden ? '查看源码' : '隐藏源码';
-						});
-
-						actions.append(toggleSourceButton, copySourceButton);
-						toolbar.append(label, actions);
-						card.append(toolbar, stage, sourceWrap);
-						pre.replaceWith(card);
-
-						mermaidCards.push({ source, stage, sourceWrap, toggleSourceButton });
-					}
-
-					const renderMermaidCards = async () => {
-						const isDark = document.documentElement.dataset.theme === 'dark';
-						mermaid.initialize({
-							startOnLoad: false,
-							theme: isDark ? 'dark' : 'default',
-							securityLevel: 'loose',
-						});
-
-						for (const [index, item] of mermaidCards.entries()) {
-							try {
-								const renderId = `mermaid-diagram-${index}-${Math.random().toString(36).slice(2, 8)}`;
-								const { svg } = await mermaid.render(renderId, item.source);
-								item.stage.innerHTML = svg;
-							} catch {
-								item.stage.innerHTML = '<p>Mermaid 图表渲染失败，请检查语法。</p>';
-								item.sourceWrap.hidden = false;
-								item.toggleSourceButton.textContent = '隐藏源码';
-							}
+						if (svg && viewBox && viewBox.length === 4 && Number.isFinite(viewBox[2])) {
+							const fittedWidth = Math.min(Math.max(viewBox[2] + 40, minWidth), proseWidth);
+							block.style.width = `${fittedWidth}px`;
+						} else {
+							block.style.width = `${fallbackWidth}px`;
 						}
-					};
-
-					await renderMermaidCards();
-					window.addEventListener('sonder:theme-change', async () => {
-						await renderMermaidCards();
-					});
+					}
 				} catch {
-					window.showToast?.('Mermaid 加载失败');
+					mermaidBlocks.forEach((block) => {
+						block.dataset.renderError = 'true';
+					});
+					window.showToast?.('Mermaid 渲染失败，请检查语法');
 				}
 			};
 
-			void setupMermaid();
+			void renderMermaid();
 
-			const codeBlocks = Array.from(document.querySelectorAll('.prose pre'));
+			const codeBlocks = Array.from(document.querySelectorAll('.prose pre:not(.mermaid)'));
 			codeBlocks.forEach((pre) => {
 				const code = pre.querySelector('code');
 				if (!code || pre.parentElement?.classList.contains('code-block')) return;
 
-				const classNames = Array.from(code.classList);
-				const languageClass = classNames.find((className) => className.startsWith('language-'));
-				const language = languageClass ? languageClass.replace('language-', '') : 'text';
+				const language = pre.getAttribute('data-language') || 'text';
 
 				const wrapper = document.createElement('div');
 				wrapper.className = 'code-block';
 				pre.parentNode?.insertBefore(wrapper, pre);
-				wrapper.appendChild(pre);
 
 				const toolbar = document.createElement('div');
 				toolbar.className = 'code-toolbar';
@@ -1399,7 +1282,7 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 				actions.appendChild(copyCodeButton);
 				toolbar.append(languageLabel, actions);
-				wrapper.appendChild(toolbar);
+				wrapper.append(toolbar, pre);
 			});
 
 			const proseImages = Array.from(document.querySelectorAll('.prose img'));
