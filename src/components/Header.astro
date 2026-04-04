@@ -1,4 +1,4 @@
-﻿---
+---
 import { Image } from 'astro:assets';
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
@@ -10,19 +10,25 @@ const baseURL = import.meta.env.BASE_URL;
 <header class="site-header">
 	<div class="shell header-shell">
 		<a href={baseURL} class="identity">
-			<Image src={ProfileImage} alt="sonder avatar" width={58} height={58} />
+			<Image src={ProfileImage} alt="sonder avatar" width={56} height={56} />
 			<div class="identity-copy">
+				<span class="eyebrow">Sonder's Notes</span>
 				<strong>{SITE_TITLE}</strong>
-				<span>个人学习博客</span>
 			</div>
 		</a>
 		<nav class="nav-links" aria-label="Primary">
 			<HeaderLink href={baseURL}>首页</HeaderLink>
 			<HeaderLink href={`${baseURL}blog`}>文章</HeaderLink>
 			<HeaderLink href={`${baseURL}about`}>关于</HeaderLink>
+			<button type="button" class="theme-toggle" aria-label="切换夜间模式" data-theme-toggle>
+				<span class="theme-light">昼</span>
+				<span class="theme-dark">夜</span>
+			</button>
 		</nav>
 	</div>
 </header>
+
+<div class="toast-region" aria-live="polite" aria-atomic="true" data-toast-region></div>
 
 <style>
 	.site-header {
@@ -30,72 +36,92 @@ const baseURL = import.meta.env.BASE_URL;
 		top: 0;
 		z-index: 40;
 		padding: 1rem 0 0;
-		background: linear-gradient(180deg, rgba(247, 251, 248, 0.94), rgba(247, 251, 248, 0.68), transparent);
+		background: linear-gradient(180deg, rgba(251, 248, 242, 0.96), rgba(251, 248, 242, 0.72), transparent);
 		backdrop-filter: blur(14px);
 	}
 
 	.header-shell {
+		min-height: 74px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		padding: 0.9rem 1rem;
+		padding: 0.65rem 0.85rem;
 		border-radius: 999px;
-		background: rgba(248, 252, 249, 0.9);
-		border: 1px solid rgba(103, 129, 114, 0.18);
-		box-shadow: 0 18px 38px rgba(84, 110, 92, 0.08);
+		background: rgba(255, 252, 247, 0.84);
+		border: 1px solid var(--line);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.identity {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.9rem;
+		gap: 0.85rem;
 		min-width: 0;
-		padding: 0.35rem 0.45rem;
+		padding: 0.3rem 0.45rem;
 		border-radius: 999px;
 	}
 
 	.identity :global(img) {
-		width: 3.6rem;
-		height: 3.6rem;
+		width: 3.3rem;
+		height: 3.3rem;
 		border-radius: 999px;
 		object-fit: cover;
-		box-shadow: 0 10px 24px rgba(84, 110, 92, 0.1);
+		box-shadow: 0 8px 22px rgba(43, 38, 30, 0.12);
 	}
 
 	.identity-copy {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: 0.2rem;
 	}
 
 	.identity-copy strong {
-		font-size: 1.1rem;
+		font-family: var(--font-display);
+		font-size: 1.25rem;
 		line-height: 1.1;
+		letter-spacing: -0.04em;
 	}
 
-	.identity-copy span {
-		font-size: 0.82rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--ink-faint);
+	.identity-copy .eyebrow {
+		font-size: 0.7rem;
 	}
 
 	.nav-links {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding: 0.38rem;
+		gap: 0.2rem;
+		padding: 0.24rem;
 		border-radius: 999px;
-		background: rgba(236, 243, 238, 0.96);
-		border: 1px solid rgba(103, 129, 114, 0.14);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 20px rgba(84, 110, 92, 0.05);
+		background: rgba(244, 239, 231, 0.78);
+		border: 1px solid var(--line);
+	}
+
+	.theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.68rem 0.82rem;
+		border-radius: 999px;
+		border: 1px solid transparent;
+		background: transparent;
+		color: var(--ink-soft);
+		font: inherit;
+		font-size: 0.82rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.theme-toggle:hover {
+		color: var(--ink);
+		background: rgba(255, 255, 255, 0.82);
+		border-color: var(--line);
 	}
 
 	@media (max-width: 720px) {
 		.header-shell {
-			border-radius: 28px;
-			padding: 0.85rem;
+			border-radius: var(--radius-xl);
+			padding: 0.75rem;
 			flex-direction: column;
 			align-items: stretch;
 		}
@@ -109,3 +135,31 @@ const baseURL = import.meta.env.BASE_URL;
 		}
 	}
 </style>
+
+<script>
+	const root = document.documentElement;
+	const toggle = document.querySelector('[data-theme-toggle]');
+	const region = document.querySelector('[data-toast-region]');
+
+	const showToast = (message) => {
+		if (!region) return;
+		const toast = document.createElement('div');
+		toast.className = 'toast';
+		toast.textContent = message;
+		region.appendChild(toast);
+		window.setTimeout(() => toast.remove(), 1800);
+	};
+
+	window.showToast = showToast;
+
+	const applyTheme = (theme) => {
+		root.dataset.theme = theme;
+		localStorage.setItem('sonder-theme', theme);
+	};
+
+	toggle?.addEventListener('click', () => {
+		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+		applyTheme(next);
+		showToast(next === 'dark' ? '已切换到夜间模式' : '已切换到日间模式');
+	});
+</script>

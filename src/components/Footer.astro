@@ -1,93 +1,97 @@
-﻿---
+---
 const today = new Date();
 const baseURL = import.meta.env.BASE_URL;
 ---
 
 <footer class="site-footer">
 	<div class="shell footer-shell">
-		<div class="footer-copy">
-			<p class="eyebrow">sonder</p>
-			<h2>保持热爱，无限进步。</h2>
-			<p>这里记录我在编程学习路上的理解变化、实践过程，以及那些值得慢下来回看的成长片段。</p>
+		<div class="footer-brand">
+			<p class="eyebrow">Writing Desk</p>
+			<h2>sonder</h2>
+			<p>记录学习过程、实践复盘，以及那些值得在几年后再回来翻看的成长片段。</p>
+			<p class="footer-note">写给当下，也写给未来的自己。</p>
+			<p class="copyright">&copy; {today.getFullYear()} sonder</p>
 		</div>
 		<div class="footer-meta">
 			<div class="footer-links">
 				<a href={baseURL}>首页</a>
-				<a href={`${baseURL}blog`}>全部文章</a>
-				<a href={`${baseURL}about`}>关于我</a>
+				<a href={`${baseURL}blog`}>文章</a>
+				<a href={`${baseURL}about`}>关于</a>
+				<a href="mailto:3192422357@qq.com">邮箱</a>
+				<a href={`${baseURL}rss.xml`}>RSS</a>
 			</div>
-			<a class="mail" href="mailto:3192422357@qq.com">3192422357@qq.com</a>
-			<p class="copyright">© {today.getFullYear()} sonder</p>
 		</div>
 	</div>
 </footer>
 
 <style>
 	.site-footer {
-		padding-bottom: 2rem;
+		padding-bottom: var(--space-6);
 	}
 
 	.footer-shell {
 		display: grid;
-		grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
-		gap: 2rem;
-		padding: 2rem;
-		border-radius: var(--radius-xl);
-		background: linear-gradient(180deg, rgba(255, 252, 247, 0.76), rgba(255, 248, 239, 0.88));
-		border: 1px solid rgba(114, 138, 123, 0.14);
-		box-shadow: var(--shadow-md);
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+		gap: var(--space-5);
+		padding: var(--space-6) 0 0;
+		margin-top: var(--space-7);
+		border-top: 1px solid var(--line);
 	}
 
-	.footer-copy {
+	.footer-brand {
 		display: grid;
-		gap: 0.9rem;
+		gap: var(--space-2);
+		max-width: 36rem;
 	}
 
-	.footer-copy h2 {
-		font-size: clamp(1.8rem, 4vw, 3rem);
+	.footer-brand h2 {
+		font-size: 1.7rem;
+		font-family: var(--font-display);
+		letter-spacing: -0.04em;
+	}
+
+	.footer-note {
+		color: var(--ink);
 	}
 
 	.footer-meta {
 		display: grid;
-		align-content: space-between;
-		gap: 1rem;
+		align-content: start;
 	}
 
 	.footer-links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, max-content));
+		justify-content: start;
+		align-content: start;
+		column-gap: var(--space-5);
+		row-gap: var(--space-2);
 	}
 
-	.footer-links a,
-	.mail {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: fit-content;
-		padding: 0.7rem 0.95rem;
-		border-radius: 999px;
-		border: 1px solid rgba(114, 138, 123, 0.16);
-		background: rgba(255, 255, 255, 0.7);
+	.footer-links a {
 		color: var(--ink-soft);
+		font-weight: 600;
+		border-bottom: 1px solid transparent;
 	}
 
-	.footer-links a:hover,
-	.mail:hover {
-		transform: translateY(-2px);
-		background: white;
+	.footer-links a:hover {
 		color: var(--ink);
+		border-color: var(--line-strong);
 	}
 
 	.copyright {
-		font-size: 0.92rem;
 		color: var(--ink-faint);
+		font-size: 0.9rem;
 	}
 
 	@media (max-width: 720px) {
 		.footer-shell {
 			grid-template-columns: 1fr;
-			padding: 1.4rem;
+			gap: var(--space-4);
+		}
+
+		.footer-links {
+			grid-template-columns: repeat(2, minmax(0, max-content));
 		}
 	}
 </style>

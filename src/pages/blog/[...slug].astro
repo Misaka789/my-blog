@@ -18,24 +18,28 @@ const currentPost = getPostCategory(post);
 const allPosts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
+const currentIndex = allPosts.findIndex((entry) => entry.id === currentPost.id);
+const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] : undefined;
+const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const categoryCount = allPosts.filter((entry) => entry.categoryName === currentPost.categoryName).length;
-const relatedPosts = allPosts
-	.filter((entry) => entry.id !== post.id)
-	.sort((a, b) => {
-		const aSameCategory = a.categoryName === currentPost.categoryName ? 1 : 0;
-		const bSameCategory = b.categoryName === currentPost.categoryName ? 1 : 0;
-		if (aSameCategory !== bSameCategory) return bSameCategory - aSameCategory;
-		return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
-	})
-	.slice(0, 3);
-const { Content } = await render(post);
+const estimateReadingTime = (content: string) => {
+	const cjkCount = (content.match(/[\u4e00-\u9fff]/g) || []).length;
+	const latinWordCount = (content.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9_]+/g) || []).length;
+	return Math.max(1, Math.round(cjkCount / 300 + latinWordCount / 220));
+};
+
+const readingTime = estimateReadingTime(post.body);
+const { Content, headings } = await render(post);
 ---
 
 <BlogPost
 	{...post.data}
 	category={currentPost.categoryName}
 	categorySummary={getCategoryMeta(currentPost.categoryName, categoryCount).summary}
-	relatedPosts={relatedPosts}
+	headings={headings}
+	readingTime={readingTime}
+	previousPost={previousPost}
+	nextPost={nextPost}
 >
 	<Content />
 </BlogPost>

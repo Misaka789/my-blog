@@ -1,17 +1,20 @@
-﻿---
+---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
-import { groupPostsByCategory, toCategoryId } from '../../data/categories';
+import { getPostCategory, groupPostsByCategory, toCategoryId } from '../../data/categories';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.map(getPostCategory);
 const categories = groupPostsByCategory(posts);
+const latestPosts = posts.slice(0, 3);
 const baseURL = import.meta.env.BASE_URL;
+const formatDateTitle = (date: Date) =>
+	`发布于 ${date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}`;
 ---
 
 <!doctype html>
@@ -19,218 +22,171 @@ const baseURL = import.meta.env.BASE_URL;
 	<head>
 		<BaseHead title={`文章 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
-			.archive-hero {
-				padding: 1rem 0 1.8rem;
+			.search-shell {
 				display: grid;
-				gap: 1rem;
+				gap: 0.75rem;
+				padding: var(--space-4);
+				margin-top: var(--space-3);
 			}
 
-			.archive-hero p {
-				max-width: 44rem;
-				font-size: 1.04rem;
-			}
-
-			.archive-overview {
-				display: grid;
-				grid-template-columns: repeat(3, minmax(0, 1fr));
-				gap: 1rem;
-				margin-bottom: 1rem;
-			}
-
-			.archive-card {
-				display: grid;
-				gap: 0.9rem;
-				padding: 1.35rem;
-				background: rgba(249, 255, 251, 0.9);
-			}
-
-			.archive-card:hover {
-				transform: translateY(-4px);
-				box-shadow: var(--shadow-md);
-			}
-
-			.archive-card-top {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 0.8rem;
-				flex-wrap: wrap;
-			}
-
-			.archive-card-summary {
-				font-size: 1rem;
+			.search-input {
+				width: 100%;
+				padding: 0.95rem 1rem;
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				background: rgba(255, 252, 247, 0.84);
 				color: var(--ink);
-			}
-
-			.archive-card-meta {
-				display: grid;
-				gap: 0.35rem;
-				padding-top: 0.9rem;
-				border-top: 1px solid rgba(103, 129, 114, 0.12);
-			}
-
-			.archive-card-meta span {
-				font-size: 0.82rem;
-				font-weight: 700;
-				letter-spacing: 0.08em;
-				color: var(--ink-faint);
+				font: inherit;
 			}
 
 			.category-nav-shell {
 				position: sticky;
 				top: 5.8rem;
 				z-index: 15;
-				padding: 0.95rem 1rem;
-				margin-bottom: 1rem;
+				margin-top: var(--space-3);
+				padding: 0.9rem 1rem;
 			}
 
 			.category-nav {
 				display: flex;
 				flex-wrap: wrap;
-				gap: 0.8rem;
+				gap: 0.65rem;
 			}
 
-			.category-nav a,
-			.post-category {
+			.category-nav a {
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
 				gap: 0.45rem;
-				width: fit-content;
-				padding: 0.82rem 1.06rem;
+				padding: 0.62rem 0.86rem;
 				border-radius: 999px;
-				background: rgba(248, 253, 249, 0.88);
-				border: 1px solid rgba(103, 129, 114, 0.15);
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
 				color: var(--ink-soft);
-				font-size: 0.94rem;
+				font-size: 0.84rem;
 				font-weight: 700;
-				box-shadow: var(--shadow-sm);
 			}
 
-			.category-nav a:hover,
-			.latest-link:hover {
+			.category-nav a:hover {
 				transform: translateY(-2px);
-				background: white;
+				box-shadow: var(--shadow-sm);
+				color: var(--ink);
 			}
 
 			.category-count {
-				font-size: 0.84rem;
+				font-size: 0.8rem;
 				color: var(--ink-faint);
 			}
 
+			.latest-section,
 			.category-section {
-				padding: 1.7rem;
-				margin-top: 1rem;
+				display: grid;
+				gap: var(--space-3);
+				padding: var(--space-5);
+				margin-top: var(--space-3);
 				scroll-margin-top: 8rem;
-				transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 			}
 
-			.category-section:target {
-				border-color: rgba(105, 138, 120, 0.28);
-				box-shadow: var(--shadow-lg);
+			.section-head {
+				display: grid;
+				gap: 0.75rem;
+			}
+
+			.latest-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: var(--space-3);
+			}
+
+			.latest-card {
+				display: grid;
+				gap: 0.75rem;
+				padding: 1.2rem;
+				border-radius: var(--radius-lg);
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.latest-card:hover,
+			.post-item:hover {
+				transform: translateY(-3px);
+				box-shadow: var(--shadow-md);
 			}
 
 			.category-head {
-				display: flex;
-				align-items: start;
-				justify-content: space-between;
-				gap: 1rem;
-				margin-bottom: 1rem;
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: var(--space-3);
+				align-items: end;
 			}
 
 			.category-copy {
 				display: grid;
 				gap: 0.75rem;
-				max-width: 42rem;
+				max-width: 40rem;
 			}
 
 			.category-head h2 {
-				font-size: clamp(1.8rem, 3vw, 2.8rem);
+				font-size: clamp(1.8rem, 3vw, 2.45rem);
 			}
 
-			.category-meta {
-				display: grid;
-				gap: 0.75rem;
-				justify-items: end;
-			}
-
-			.latest-link {
-				display: inline-flex;
-				align-items: center;
-				padding: 0.8rem 1rem;
-				border-radius: 999px;
-				background: rgba(248, 253, 249, 0.88);
-				border: 1px solid rgba(103, 129, 114, 0.15);
-				color: var(--ink-soft);
+			.post-count {
+				font-size: 0.84rem;
 				font-weight: 700;
-				box-shadow: var(--shadow-sm);
+				color: var(--ink-faint);
 			}
 
 			.post-list {
 				display: grid;
-				gap: 1rem;
+				gap: var(--space-3);
 			}
 
 			.post-item {
 				display: grid;
-				grid-template-columns: 9rem minmax(0, 1fr) auto;
-				gap: 1rem;
+				grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+				gap: var(--space-3);
 				align-items: start;
-				padding: 1.4rem 1.45rem;
-				background: rgba(248, 253, 249, 0.88);
-				border: 1px solid rgba(103, 129, 114, 0.15);
-				border-radius: var(--radius-xl);
+				padding: var(--space-4);
+				background: rgba(255, 252, 247, 0.72);
+				border: 1px solid var(--line);
+				border-radius: var(--radius-lg);
 				box-shadow: var(--shadow-sm);
 			}
 
-			.post-item:hover {
-				transform: translateY(-4px);
-				box-shadow: var(--shadow-md);
-				background: white;
-			}
-
 			.post-date {
-				font-size: 0.88rem;
+				font-size: 0.85rem;
 				font-weight: 700;
-				letter-spacing: 0.04em;
 				color: var(--ink-faint);
 			}
 
 			.post-content {
 				display: grid;
-				gap: 0.55rem;
+				gap: 0.65rem;
 			}
 
 			.post-content h3 {
-				font-size: clamp(1.5rem, 2vw, 2rem);
-				line-height: 1.1;
+				font-size: clamp(1.35rem, 2vw, 1.8rem);
+				line-height: 1.12;
 			}
 
 			.post-arrow {
-				color: var(--accent);
-				font-size: 1.5rem;
+				color: var(--accent-strong);
+				font-size: 1.2rem;
 				line-height: 1;
 			}
 
-			@media (max-width: 960px) {
-				.archive-overview {
-					grid-template-columns: 1fr;
-				}
-			}
-
 			@media (max-width: 720px) {
-				.category-section,
-				.category-nav-shell {
-					padding: 1.2rem;
+				.search-shell,
+				.latest-section,
+				.category-section {
+					padding: var(--space-4);
 				}
 
+				.latest-grid,
 				.category-head,
 				.post-item {
 					grid-template-columns: 1fr;
-				}
-
-				.category-meta {
-					justify-items: start;
 				}
 
 				.post-arrow {
@@ -242,26 +198,9 @@ const baseURL = import.meta.env.BASE_URL;
 	<body>
 		<Header />
 		<main>
-			<section class="archive-hero">
-				<span class="section-tag">分类归档</span>
-				<h1>按文件夹整理的文章</h1>
-				<p>现在分类会直接跟着 <code>src/content/blog</code> 下面的文件夹结构变化。你新建一个文件夹、放进文章，这里就会自动出现对应分类。</p>
-			</section>
-
-			<section class="archive-overview">
-				{categories.map((category) => (
-					<a class="archive-card card" href={`#${toCategoryId(category.name)}`}>
-						<div class="archive-card-top">
-							<span class="post-category">{category.name}</span>
-							<span class="category-count">{category.count} 篇</span>
-						</div>
-						<p class="archive-card-summary">{category.summary}</p>
-						<div class="archive-card-meta">
-							<span>从这篇开始</span>
-							<strong>{category.latest?.data.title}</strong>
-						</div>
-					</a>
-				))}
+			<section class="search-shell soft-panel">
+				<span class="section-tag">站内搜索</span>
+				<input class="search-input" type="search" placeholder="搜索标题、描述或分类" data-search-input />
 			</section>
 
 			<section class="category-nav-shell soft-panel">
@@ -275,27 +214,36 @@ const baseURL = import.meta.env.BASE_URL;
 				</div>
 			</section>
 
+			<section class="latest-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">最近更新</span>
+					<h2>如果是第一次来，建议先从这里开始</h2>
+				</div>
+				<div class="latest-grid">
+					{latestPosts.map((post) => (
+						<a class="latest-card" href={`${baseURL}blog/${post.id}/`} title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
+							<span class="eyebrow">{post.categoryName}</span>
+							<h3>{post.data.title}</h3>
+							<p>{post.data.description}</p>
+							<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
+						</a>
+					))}
+				</div>
+			</section>
+
 			{categories.map((category) => (
-				<section class="category-section soft-panel" id={toCategoryId(category.name)}>
+				<section class="category-section soft-panel" id={toCategoryId(category.name)} data-category-section>
 					<div class="category-head">
 						<div class="category-copy">
-							<div class="post-category">{category.name}</div>
+							<span class="section-tag">{category.name}</span>
 							<h2>{category.name}</h2>
-							<p>{category.summary}</p>
+							<p>{category.summary} {category.readerHint}</p>
 						</div>
-						<div class="category-meta">
-							<div class="post-category">{category.count} 篇文章</div>
-							<div>{category.readerHint}</div>
-							{category.latest && (
-								<a class="latest-link" href={`${baseURL}blog/${category.latest.id}/`}>
-									最近更新：{category.latest.data.title}
-								</a>
-							)}
-						</div>
+						<div class="post-count">{category.count} 篇</div>
 					</div>
 					<div class="post-list">
 						{category.posts.map((post) => (
-							<a href={`${baseURL}blog/${post.id}/`} class="post-item">
+							<a href={`${baseURL}blog/${post.id}/`} class="post-item" title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
 								<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
 								<div class="post-content">
 									<h3>{post.data.title}</h3>
@@ -309,5 +257,24 @@ const baseURL = import.meta.env.BASE_URL;
 			))}
 		</main>
 		<Footer />
+		<script>
+			const input = document.querySelector('[data-search-input]');
+			const items = Array.from(document.querySelectorAll('[data-search-item]'));
+			const sections = Array.from(document.querySelectorAll('[data-category-section]'));
+
+			const updateSearch = () => {
+				const query = input?.value.trim().toLowerCase() || '';
+				items.forEach((item) => {
+					const text = item.getAttribute('data-search-text')?.toLowerCase() || '';
+					item.style.display = !query || text.includes(query) ? '' : 'none';
+				});
+				sections.forEach((section) => {
+					const visible = Array.from(section.querySelectorAll('[data-search-item]')).some((item) => item.style.display !== 'none');
+					section.style.display = visible || !query ? '' : 'none';
+				});
+			};
+
+			input?.addEventListener('input', updateSearch);
+		</script>
 	</body>
 </html>
