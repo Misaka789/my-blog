@@ -48,13 +48,13 @@ const isSameCalendarDate = (left: Date, right: Date) =>
 	left.getDate() === right.getDate();
 
 const readingTime = estimateReadingTime(post.body);
+const { Content, headings } = await render(post);
 const postFilePath = resolvePostFilePath(post.filePath);
 const lastModifiedDate = postFilePath ? statSync(postFilePath).mtime : undefined;
 const displayUpdatedDate =
 	lastModifiedDate && !isSameCalendarDate(lastModifiedDate, post.data.pubDate)
 		? lastModifiedDate
 		: undefined;
-const { Content, headings } = await render(post);
 ---
 
 <BlogPost

@@ -50,38 +50,119 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.progress {
 				position: fixed;
-				top: 0;
-				left: 0;
-				height: 3px;
-				width: 100%;
-				background: transparent;
-				z-index: 90;
+				top: 1rem;
+				right: 1rem;
+				left: auto;
+				display: grid;
+				gap: 0.7rem;
+				width: min(320px, calc(100vw - 2rem));
+				padding: 0.95rem 1rem;
+				border-radius: 20px;
+				background: rgba(255, 252, 247, 0.84);
+				border: 1px solid rgba(116, 108, 94, 0.14);
+				box-shadow: 0 22px 44px rgba(43, 38, 30, 0.12);
+				backdrop-filter: blur(18px);
+				z-index: 95;
+				opacity: 0;
+				transform: translateY(-10px) scale(0.98);
+				transition:
+					opacity 260ms var(--transition),
+					transform 260ms var(--transition),
+					box-shadow 260ms var(--transition);
 			}
 
-			.progress::after {
-				content: '';
-				display: block;
-				height: 100%;
-				width: var(--progress, 0%);
-				background: linear-gradient(90deg, var(--accent-warm), var(--accent));
-				transition: width 100ms linear;
+			.progress.ready,
+			.progress.engaged {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
+
+			.progress.engaged {
+				box-shadow: 0 26px 56px rgba(43, 38, 30, 0.16);
+			}
+
+			.progress-topline {
+				display: flex;
+				align-items: baseline;
+				justify-content: space-between;
+				gap: 1rem;
+			}
+
+			.progress-label {
+				font-size: 0.72rem;
+				font-weight: 800;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
 			}
 
 			.progress-badge {
-				position: fixed;
-				right: 1rem;
-				bottom: 1rem;
+				font-size: 1.1rem;
+				font-weight: 800;
+				letter-spacing: -0.04em;
+				color: var(--ink);
+			}
+
+			.progress-track {
+				position: relative;
+				height: 0.62rem;
+				border-radius: 999px;
+				background:
+					linear-gradient(90deg, rgba(93, 154, 121, 0.08), rgba(226, 168, 111, 0.16)),
+					rgba(255, 255, 255, 0.65);
+				border: 1px solid rgba(116, 108, 94, 0.08);
+				overflow: hidden;
+			}
+
+			.progress-fill {
+				height: 100%;
+				width: var(--progress, 0%);
+				border-radius: inherit;
+				background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+				box-shadow: 0 0 18px rgba(93, 154, 121, 0.3);
+				transition: width 140ms linear;
+			}
+
+			.progress-meta {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 0.7rem;
+				align-items: center;
+			}
+
+			.progress-section {
+				min-width: 0;
+			}
+
+			.progress-section-title {
+				display: block;
+				font-size: 0.92rem;
+				font-weight: 700;
+				line-height: 1.3;
+				color: var(--ink);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.progress-section-subtitle {
+				display: block;
+				margin-top: 0.16rem;
+				font-size: 0.76rem;
+				color: var(--ink-faint);
+			}
+
+			.progress-chip {
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				min-width: 3.4rem;
-				padding: 0.7rem 0.8rem;
+				padding: 0.5rem 0.72rem;
 				border-radius: 999px;
-				background: rgba(22, 31, 26, 0.9);
+				background: rgba(29, 41, 34, 0.88);
 				color: white;
-				font-size: 0.82rem;
+				font-size: 0.75rem;
 				font-weight: 700;
-				z-index: 90;
+				letter-spacing: 0.03em;
 			}
 
 			.article-shell {
@@ -190,9 +271,10 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			.prose {
 				display: grid;
-				gap: 1.05rem;
-				font-size: 1rem;
-				line-height: 1.9;
+				gap: 1.15rem;
+				font-size: 1.04rem;
+				line-height: 1.95;
+				color: var(--ink-soft);
 			}
 
 			.prose :global(h2),
@@ -201,25 +283,50 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				scroll-margin-top: 6rem;
 				font-family: var(--font-display);
 				letter-spacing: -0.035em;
+				color: var(--ink);
 			}
 
 			.prose :global(h2) {
-				margin-top: 2.4rem;
+				position: relative;
+				margin-top: 2.9rem;
+				padding-top: 1rem;
 				font-size: clamp(1.6rem, 2.6vw, 2.15rem);
 				line-height: 1.12;
 			}
 
+			.prose :global(h2)::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 4rem;
+				height: 2px;
+				border-radius: 999px;
+				background: linear-gradient(90deg, var(--accent-warm), var(--accent));
+			}
+
 			.prose :global(h3) {
-				margin-top: 1.5rem;
+				margin-top: 2rem;
 				font-size: clamp(1.2rem, 2vw, 1.45rem);
 				line-height: 1.18;
+			}
+
+			.prose :global(h4) {
+				margin-top: 1.4rem;
+				font-size: 1.05rem;
+				line-height: 1.3;
 			}
 
 			.prose :global(p),
 			.prose :global(ul),
 			.prose :global(ol),
-			.prose :global(blockquote) {
+			.prose :global(blockquote),
+			.prose :global(table) {
 				max-width: 42rem;
+			}
+
+			.prose :global(p) {
+				text-wrap: pretty;
 			}
 
 			.prose :global(a) {
@@ -227,23 +334,437 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				text-decoration: underline;
 				text-decoration-color: rgba(96, 120, 103, 0.32);
 				text-underline-offset: 0.18em;
+				text-decoration-thickness: 0.08em;
 			}
 
 			.prose :global(p + p) {
-				margin-top: 0.15rem;
+				margin-top: 0.35rem;
 			}
 
 			.prose :global(ul),
 			.prose :global(ol) {
-				padding-left: 1.15rem;
+				padding-left: 1.25rem;
 			}
 
 			.prose :global(li) {
-				padding-left: 0.05rem;
+				padding-left: 0.14rem;
+			}
+
+			.prose :global(ul li::marker) {
+				color: var(--accent);
+			}
+
+			.prose :global(ol li::marker) {
+				color: var(--accent-strong);
+				font-weight: 700;
 			}
 
 			.prose :global(pre) {
+				position: relative;
 				max-width: 100%;
+				margin: 1.6rem 0;
+				padding: 2.2rem 1.25rem 1.2rem;
+				border-radius: 16px;
+				background:
+					linear-gradient(180deg, rgba(18, 29, 23, 0.98), rgba(18, 29, 23, 0.94)),
+					linear-gradient(135deg, rgba(120, 195, 151, 0.14), rgba(239, 180, 126, 0.12));
+				border: 1px solid rgba(120, 195, 151, 0.14);
+				box-shadow:
+					inset 0 1px 0 rgba(255, 255, 255, 0.06),
+					0 14px 32px rgba(24, 31, 27, 0.18);
+			}
+
+			.prose :global(.code-block) {
+				position: relative;
+				max-width: 100%;
+				margin: 1.6rem 0;
+			}
+
+			.prose :global(.code-toolbar) {
+				position: absolute;
+				top: 0.9rem;
+				right: 0.95rem;
+				left: 4rem;
+				z-index: 2;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+				pointer-events: none;
+			}
+
+			.prose :global(.code-language) {
+				display: inline-flex;
+				align-items: center;
+				min-width: 0;
+				padding: 0.3rem 0.56rem;
+				border-radius: 999px;
+				background: rgba(239, 247, 242, 0.1);
+				border: 1px solid rgba(239, 247, 242, 0.08);
+				color: rgba(239, 247, 242, 0.82);
+				font-size: 0.72rem;
+				font-weight: 800;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.prose :global(.code-copy) {
+				pointer-events: auto;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.34rem 0.62rem;
+				border-radius: 999px;
+				border: 1px solid rgba(239, 247, 242, 0.1);
+				background: rgba(239, 247, 242, 0.08);
+				color: rgba(239, 247, 242, 0.9);
+				font-size: 0.72rem;
+				font-weight: 700;
+				cursor: pointer;
+				transition:
+					transform var(--transition),
+					background-color var(--transition),
+					border-color var(--transition),
+					color var(--transition);
+			}
+
+			.prose :global(.code-copy:hover) {
+				transform: translateY(-1px);
+				background: rgba(239, 247, 242, 0.14);
+				border-color: rgba(239, 247, 242, 0.16);
+			}
+
+			.prose :global(.code-expand) {
+				pointer-events: auto;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.34rem 0.62rem;
+				border-radius: 999px;
+				border: 1px solid rgba(239, 247, 242, 0.1);
+				background: rgba(239, 247, 242, 0.08);
+				color: rgba(239, 247, 242, 0.9);
+				font-size: 0.72rem;
+				font-weight: 700;
+				cursor: pointer;
+				transition:
+					transform var(--transition),
+					background-color var(--transition),
+					border-color var(--transition),
+					color var(--transition);
+			}
+
+			.prose :global(.code-expand:hover) {
+				transform: translateY(-1px);
+				background: rgba(239, 247, 242, 0.14);
+				border-color: rgba(239, 247, 242, 0.16);
+			}
+
+			.prose :global(.code-actions) {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				justify-content: flex-end;
+			}
+
+			.prose :global(.code-block.collapsed pre) {
+				max-height: 22rem;
+				overflow: hidden;
+			}
+
+			.prose :global(.code-block.collapsed pre::after) {
+				content: '';
+				position: absolute;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				height: 6rem;
+				background: linear-gradient(180deg, rgba(18, 29, 23, 0), rgba(18, 29, 23, 0.98));
+				pointer-events: none;
+			}
+
+			.prose :global(.mermaid-block) {
+				position: relative;
+				max-width: 100%;
+				margin: 1.8rem 0;
+				padding: 1.25rem 1.25rem 1rem;
+				border-radius: 18px;
+				background:
+					linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 252, 249, 0.92));
+				border: 1px solid rgba(93, 154, 121, 0.14);
+				box-shadow: 0 14px 32px rgba(43, 38, 30, 0.08);
+				overflow: hidden;
+			}
+
+			.prose :global(.mermaid-block::before) {
+				content: '';
+				position: absolute;
+				inset: 0 auto auto 0;
+				width: 100%;
+				height: 3px;
+				background: linear-gradient(90deg, var(--accent-warm), var(--accent));
+				opacity: 0.9;
+			}
+
+			.prose :global(.mermaid-toolbar) {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+				margin-bottom: 0.85rem;
+			}
+
+			.prose :global(.mermaid-label) {
+				display: inline-flex;
+				align-items: center;
+				padding: 0.34rem 0.62rem;
+				border-radius: 999px;
+				background: rgba(93, 154, 121, 0.1);
+				border: 1px solid rgba(93, 154, 121, 0.12);
+				color: var(--accent-strong);
+				font-size: 0.72rem;
+				font-weight: 800;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.prose :global(.mermaid-actions) {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				justify-content: flex-end;
+			}
+
+			.prose :global(.mermaid-copy),
+			.prose :global(.mermaid-toggle) {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.34rem 0.62rem;
+				border-radius: 999px;
+				border: 1px solid rgba(93, 154, 121, 0.12);
+				background: rgba(255, 255, 255, 0.78);
+				color: var(--ink-soft);
+				font-size: 0.72rem;
+				font-weight: 700;
+				cursor: pointer;
+				transition:
+					transform var(--transition),
+					background-color var(--transition),
+					border-color var(--transition),
+					color var(--transition);
+			}
+
+			.prose :global(.mermaid-copy:hover),
+			.prose :global(.mermaid-toggle:hover) {
+				transform: translateY(-1px);
+				background: white;
+				color: var(--ink);
+			}
+
+			.prose :global(.mermaid-stage) {
+				overflow-x: auto;
+				padding: 0.4rem 0.15rem 0.2rem;
+			}
+
+			.prose :global(.mermaid-stage svg) {
+				max-width: 100%;
+				height: auto;
+				margin: 0 auto;
+			}
+
+			.prose :global(.mermaid-source) {
+				margin-top: 0.85rem;
+				padding-top: 0.85rem;
+				border-top: 1px solid rgba(93, 154, 121, 0.12);
+			}
+
+			.prose :global(.mermaid-source[hidden]) {
+				display: none;
+			}
+
+			.prose :global(.mermaid-source pre) {
+				margin: 0;
+			}
+
+			.prose :global(pre)::before {
+				content: '';
+				position: absolute;
+				top: 0.95rem;
+				left: 1rem;
+				width: 0.68rem;
+				height: 0.68rem;
+				border-radius: 999px;
+				background: #f06d6d;
+				box-shadow:
+					1rem 0 0 #f1be55,
+					2rem 0 0 #69c27d;
+			}
+
+			.prose :global(pre code) {
+				display: block;
+				color: rgba(239, 247, 242, 0.92);
+				font-size: 0.92rem;
+				line-height: 1.75;
+			}
+
+			.prose :global(:not(pre) > code) {
+				padding: 0.2rem 0.46rem;
+				border-radius: 0.5rem;
+				background: rgba(93, 154, 121, 0.12);
+				border: 1px solid rgba(93, 154, 121, 0.1);
+				color: var(--accent-strong);
+				font-size: 0.88em;
+			}
+
+			.prose :global(blockquote) {
+				position: relative;
+				margin: 1.7rem 0;
+				padding: 1.2rem 1.25rem 1.2rem 1.35rem;
+				border-left: 0;
+				border-radius: 16px;
+				background:
+					linear-gradient(180deg, rgba(255, 248, 240, 0.9), rgba(255, 252, 247, 0.78));
+				border: 1px solid rgba(226, 168, 111, 0.18);
+				box-shadow: 0 10px 24px rgba(226, 168, 111, 0.08);
+			}
+
+			.prose :global(blockquote)::before {
+				content: '“';
+				position: absolute;
+				top: 0.55rem;
+				left: 0.85rem;
+				font-family: var(--font-display);
+				font-size: 2.1rem;
+				line-height: 1;
+				color: rgba(226, 168, 111, 0.55);
+			}
+
+			.prose :global(blockquote > :first-child) {
+				margin-top: 0;
+			}
+
+			.prose :global(blockquote > :last-child) {
+				margin-bottom: 0;
+			}
+
+			.prose :global(hr) {
+				margin: 2.6rem 0 2.2rem;
+				height: 1px;
+				background: linear-gradient(90deg, transparent, rgba(93, 154, 121, 0.4), transparent);
+			}
+
+			.prose :global(table) {
+				width: 100%;
+				border-collapse: collapse;
+				overflow: hidden;
+				border-radius: 14px;
+				border: 1px solid rgba(116, 108, 94, 0.12);
+				box-shadow: 0 10px 24px rgba(43, 38, 30, 0.05);
+				background: rgba(255, 253, 249, 0.85);
+			}
+
+			.prose :global(th),
+			.prose :global(td) {
+				padding: 0.8rem 0.95rem;
+				text-align: left;
+				border-bottom: 1px solid rgba(116, 108, 94, 0.1);
+			}
+
+			.prose :global(th) {
+				font-size: 0.86rem;
+				font-weight: 800;
+				color: var(--ink);
+				background: rgba(93, 154, 121, 0.08);
+			}
+
+			.prose :global(tr:last-child td) {
+				border-bottom: 0;
+			}
+
+			.prose :global(figure) {
+				margin: 1.8rem 0;
+			}
+
+			.prose :global(figcaption) {
+				margin-top: 0.7rem;
+				font-size: 0.86rem;
+				text-align: center;
+				color: var(--ink-faint);
+			}
+
+			.prose :global(strong) {
+				color: var(--ink);
+			}
+
+			html[data-theme='dark'] .progress {
+				background: rgba(17, 25, 21, 0.88);
+				border-color: rgba(141, 172, 151, 0.18);
+				box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+			}
+
+			html[data-theme='dark'] .progress-track {
+				background:
+					linear-gradient(90deg, rgba(120, 195, 151, 0.12), rgba(239, 180, 126, 0.16)),
+					rgba(255, 255, 255, 0.04);
+				border-color: rgba(141, 172, 151, 0.14);
+			}
+
+			html[data-theme='dark'] .progress-chip {
+				background: rgba(237, 246, 239, 0.1);
+				color: var(--ink);
+				border: 1px solid rgba(141, 172, 151, 0.14);
+			}
+
+			html[data-theme='dark'] .prose :global(blockquote) {
+				background: linear-gradient(180deg, rgba(38, 29, 21, 0.68), rgba(18, 29, 23, 0.86));
+				border-color: rgba(239, 180, 126, 0.16);
+			}
+
+			html[data-theme='dark'] .prose :global(table) {
+				background: rgba(18, 29, 23, 0.88);
+				border-color: rgba(141, 172, 151, 0.14);
+			}
+
+			html[data-theme='dark'] .prose :global(th),
+			html[data-theme='dark'] .prose :global(td) {
+				border-bottom-color: rgba(141, 172, 151, 0.12);
+			}
+
+			html[data-theme='dark'] .prose :global(th) {
+				background: rgba(120, 195, 151, 0.1);
+			}
+
+			html[data-theme='dark'] .prose :global(.mermaid-block) {
+				background: linear-gradient(180deg, rgba(18, 29, 23, 0.96), rgba(16, 24, 20, 0.94));
+				border-color: rgba(141, 172, 151, 0.18);
+			}
+
+			html[data-theme='dark'] .prose :global(.mermaid-label) {
+				background: rgba(120, 195, 151, 0.12);
+				border-color: rgba(141, 172, 151, 0.16);
+				color: var(--accent-strong);
+			}
+
+			html[data-theme='dark'] .prose :global(.mermaid-copy),
+			html[data-theme='dark'] .prose :global(.mermaid-toggle) {
+				background: rgba(237, 246, 239, 0.08);
+				border-color: rgba(141, 172, 151, 0.14);
+				color: var(--ink);
+			}
+
+			html[data-theme='dark'] .prose :global(.mermaid-source) {
+				border-top-color: rgba(141, 172, 151, 0.14);
+			}
+
+			html[data-theme='dark'] .toc-list::before {
+				box-shadow: 0 0 16px rgba(120, 195, 151, 0.22);
+			}
+
+			html[data-theme='dark'] .toc-link.active {
+				background: linear-gradient(90deg, rgba(120, 195, 151, 0.14), rgba(120, 195, 151, 0.04));
 			}
 
 			.article-toc {
@@ -260,32 +781,53 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.toc-list {
+				position: relative;
 				display: grid;
 				gap: 0.35rem;
 				padding-left: 0.85rem;
 				border-left: 1px solid var(--line);
 			}
 
+			.toc-list::before {
+				content: '';
+				position: absolute;
+				left: -1px;
+				top: var(--toc-indicator-top, 0px);
+				width: 2px;
+				height: var(--toc-indicator-height, 0px);
+				border-radius: 999px;
+				background: linear-gradient(180deg, var(--accent-warm), var(--accent));
+				box-shadow: 0 0 14px rgba(93, 154, 121, 0.16);
+				opacity: var(--toc-indicator-opacity, 0);
+				transition:
+					top 220ms var(--transition),
+					height 220ms var(--transition),
+					opacity 220ms var(--transition);
+			}
+
 			.toc-link {
 				justify-content: start;
 				width: 100%;
 				text-align: left;
-				padding: 0.5rem 0.2rem;
-				border-radius: 6px;
+				padding: 0.58rem 0.72rem 0.58rem 0.55rem;
+				border-radius: 12px;
 				border: 0;
 				background: transparent;
 				box-shadow: none;
 				font-weight: 600;
 				font-size: 0.88rem;
+				line-height: 1.35;
+				transform-origin: left center;
 			}
 
 			.toc-link.active {
 				color: var(--accent-strong);
-				background: rgba(93, 154, 121, 0.06);
+				background: linear-gradient(90deg, rgba(93, 154, 121, 0.12), rgba(93, 154, 121, 0.03));
+				transform: translateX(4px);
 			}
 
 			.toc-link.depth-3 {
-				padding-left: 1.15rem;
+				padding-left: 1.35rem;
 				font-size: 0.82rem;
 				color: var(--ink-faint);
 			}
@@ -383,6 +925,16 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 					width: min(calc(100% - 1rem), 1180px);
 				}
 
+				.progress {
+					top: auto;
+					right: 0.75rem;
+					bottom: 0.75rem;
+					width: min(100%, calc(100vw - 1.5rem));
+					padding: 0.78rem 0.85rem;
+					gap: 0.55rem;
+					border-radius: 18px;
+				}
+
 				.article-hero,
 				.hero-media,
 				.article-body,
@@ -414,12 +966,49 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				.prose :global(h2) {
 					margin-top: 2rem;
 				}
+
+				.progress-badge {
+					font-size: 1rem;
+				}
+
+				.prose :global(.code-toolbar) {
+					left: 3.9rem;
+					right: 0.85rem;
+					gap: 0.5rem;
+				}
+
+				.prose :global(.code-language),
+				.prose :global(.code-copy) {
+					font-size: 0.68rem;
+				}
+
+				.progress-section-title {
+					font-size: 0.84rem;
+				}
+
+				.progress-chip {
+					padding: 0.42rem 0.6rem;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<div class="progress" aria-hidden="true"></div>
-		<div class="progress-badge" data-progress-badge>0%</div>
+		<div class="progress" aria-live="polite">
+			<div class="progress-topline">
+				<span class="progress-label">阅读进度</span>
+				<span class="progress-badge" data-progress-badge>0%</span>
+			</div>
+			<div class="progress-track" aria-hidden="true">
+				<div class="progress-fill"></div>
+			</div>
+			<div class="progress-meta">
+				<div class="progress-section">
+					<span class="progress-section-title" data-progress-section>正在阅读正文</span>
+					<span class="progress-section-subtitle" data-progress-subtitle>跟着当前章节继续往下读</span>
+				</div>
+				<span class="progress-chip" data-progress-eta>剩余约 {readingTime} 分钟</span>
+			</div>
+		</div>
 		<Header />
 		<main>
 			<article class="article-shell">
@@ -506,19 +1095,59 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			const progress = document.querySelector('.progress');
 			const progressBadge = document.querySelector('[data-progress-badge]');
+			const progressSection = document.querySelector('[data-progress-section]');
+			const progressSubtitle = document.querySelector('[data-progress-subtitle]');
+			const progressEta = document.querySelector('[data-progress-eta]');
+			const articleBody = document.querySelector('.article-body');
+			const contentHeadings = Array.from(document.querySelectorAll('.prose h2, .prose h3'));
+
+			const totalReadingMinutes = Math.max(1, Number.parseInt(`${readingTime}`, 10) || 1);
+			const updateCurrentSection = () => {
+				if (!progressSection || !progressSubtitle) return;
+
+				const currentHeading = contentHeadings.reduce((activeHeading, heading) => {
+					const rect = heading.getBoundingClientRect();
+					if (rect.top <= window.innerHeight * 0.28) {
+						return heading;
+					}
+					return activeHeading;
+				}, null);
+
+				if (!currentHeading) {
+					progressSection.textContent = '正在阅读正文';
+					progressSubtitle.textContent = '跟着当前章节继续往下读';
+					return;
+				}
+
+				progressSection.textContent = currentHeading.textContent?.trim() || '正在阅读正文';
+				progressSubtitle.textContent = currentHeading.tagName === 'H2' ? '当前主章节' : '当前小节';
+			};
+
 			const updateProgress = () => {
 				if (!progress) return;
-				const scrollTop = window.scrollY;
-				const max = document.documentElement.scrollHeight - window.innerHeight;
+				const articleRect = articleBody?.getBoundingClientRect();
+				const articleTop = articleRect ? window.scrollY + articleRect.top : 0;
+				const articleHeight = articleBody?.scrollHeight || document.documentElement.scrollHeight;
+				const max = Math.max(1, articleHeight - window.innerHeight * 0.72);
+				const scrollTop = Math.max(0, window.scrollY - articleTop + window.innerHeight * 0.2);
 				const ratio = max <= 0 ? 0 : Math.min(1, Math.max(0, scrollTop / max));
 				const percent = `${Math.round(ratio * 100)}%`;
 				progress.style.setProperty('--progress', `${(ratio * 100).toFixed(2)}%`);
+				progress.classList.add('ready');
+				progress.classList.toggle('engaged', ratio > 0.03);
 				if (progressBadge) progressBadge.textContent = percent;
+				if (progressEta) {
+					const remainingMinutes = Math.max(0, Math.ceil(totalReadingMinutes * (1 - ratio)));
+					progressEta.textContent = remainingMinutes > 0 ? `剩余约 ${remainingMinutes} 分钟` : '已读完正文';
+				}
+				updateCurrentSection();
 			};
 			window.addEventListener('scroll', updateProgress, { passive: true });
+			window.addEventListener('resize', updateProgress);
 			updateProgress();
 
 			const tocLinks = Array.from(document.querySelectorAll('[data-toc-link]'));
+			const tocList = document.querySelector('.toc-list');
 			const headingTargets = tocLinks
 				.map((link) => {
 					const slug = link.getAttribute('data-toc-link');
@@ -528,10 +1157,22 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				.filter(Boolean);
 
 			if (headingTargets.length > 0) {
+				const updateTocIndicator = (activeLink) => {
+					if (!tocList || !activeLink) return;
+					tocList.style.setProperty('--toc-indicator-top', `${activeLink.offsetTop}px`);
+					tocList.style.setProperty('--toc-indicator-height', `${activeLink.offsetHeight}px`);
+					tocList.style.setProperty('--toc-indicator-opacity', '1');
+				};
+
 				const activateLink = (id) => {
 					headingTargets.forEach(({ link, target }) => {
 						link.classList.toggle('active', target.id === id);
 					});
+					const activeLink = headingTargets.find(({ target }) => target.id === id)?.link;
+					if (activeLink) {
+						updateTocIndicator(activeLink);
+						activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+					}
 				};
 
 				const observer = new IntersectionObserver(
@@ -552,6 +1193,210 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				headingTargets.forEach(({ target }) => observer.observe(target));
 				activateLink(headingTargets[0].target.id);
 			}
+
+			const formatLanguageLabel = (rawLanguage) => {
+				if (!rawLanguage) return 'TEXT';
+
+				const normalized = rawLanguage.toLowerCase();
+				const labels = {
+					js: 'JavaScript',
+					javascript: 'JavaScript',
+					ts: 'TypeScript',
+					typescript: 'TypeScript',
+					tsx: 'TSX',
+					jsx: 'JSX',
+					html: 'HTML',
+					css: 'CSS',
+					scss: 'SCSS',
+					bash: 'Bash',
+					shell: 'Shell',
+					sh: 'Shell',
+					json: 'JSON',
+					yaml: 'YAML',
+					yml: 'YAML',
+					md: 'Markdown',
+					markdown: 'Markdown',
+					java: 'Java',
+					python: 'Python',
+					py: 'Python',
+					go: 'Go',
+					rust: 'Rust',
+					text: 'Text',
+					txt: 'Text',
+				};
+
+				return labels[normalized] || rawLanguage.toUpperCase();
+			};
+
+			const mermaidCodeBlocks = Array.from(document.querySelectorAll('.prose pre code.language-mermaid'));
+			if (mermaidCodeBlocks.length > 0) {
+				try {
+					const mermaidModule = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+					const mermaid = mermaidModule.default;
+					const mermaidCards = [];
+
+					for (const code of mermaidCodeBlocks) {
+						const pre = code.closest('pre');
+						if (!pre) continue;
+
+						const source = code.textContent || '';
+						const card = document.createElement('div');
+						card.className = 'mermaid-block';
+
+						const toolbar = document.createElement('div');
+						toolbar.className = 'mermaid-toolbar';
+
+						const label = document.createElement('span');
+						label.className = 'mermaid-label';
+						label.textContent = 'Mermaid';
+
+						const actions = document.createElement('div');
+						actions.className = 'mermaid-actions';
+
+						const copySourceButton = document.createElement('button');
+						copySourceButton.className = 'mermaid-copy';
+						copySourceButton.type = 'button';
+						copySourceButton.textContent = '复制源码';
+
+						const toggleSourceButton = document.createElement('button');
+						toggleSourceButton.className = 'mermaid-toggle';
+						toggleSourceButton.type = 'button';
+						toggleSourceButton.textContent = '查看源码';
+
+						const stage = document.createElement('div');
+						stage.className = 'mermaid-stage';
+
+						const sourceWrap = document.createElement('div');
+						sourceWrap.className = 'mermaid-source';
+						sourceWrap.hidden = true;
+
+						const sourcePre = pre.cloneNode(true);
+						sourceWrap.appendChild(sourcePre);
+
+						copySourceButton.addEventListener('click', async () => {
+							try {
+								await navigator.clipboard.writeText(source);
+								copySourceButton.textContent = '已复制';
+								window.showToast?.('Mermaid 源码已复制');
+								window.setTimeout(() => {
+									copySourceButton.textContent = '复制源码';
+								}, 1800);
+							} catch {
+								copySourceButton.textContent = '复制失败';
+								window.setTimeout(() => {
+									copySourceButton.textContent = '复制源码';
+								}, 1800);
+								window.showToast?.('复制失败');
+							}
+						});
+
+						toggleSourceButton.addEventListener('click', () => {
+							sourceWrap.hidden = !sourceWrap.hidden;
+							toggleSourceButton.textContent = sourceWrap.hidden ? '查看源码' : '隐藏源码';
+						});
+
+						actions.append(toggleSourceButton, copySourceButton);
+						toolbar.append(label, actions);
+						card.append(toolbar, stage, sourceWrap);
+						pre.replaceWith(card);
+
+						mermaidCards.push({ source, stage, sourceWrap, toggleSourceButton });
+					}
+
+					const renderMermaidCards = async () => {
+						const isDark = document.documentElement.dataset.theme === 'dark';
+						mermaid.initialize({
+							startOnLoad: false,
+							theme: isDark ? 'dark' : 'default',
+							securityLevel: 'loose',
+						});
+
+						for (const [index, item] of mermaidCards.entries()) {
+							try {
+								const renderId = `mermaid-diagram-${index}-${Math.random().toString(36).slice(2, 8)}`;
+								const { svg } = await mermaid.render(renderId, item.source);
+								item.stage.innerHTML = svg;
+							} catch {
+								item.stage.innerHTML = '<p>Mermaid 图表渲染失败，请检查语法。</p>';
+								item.sourceWrap.hidden = false;
+								item.toggleSourceButton.textContent = '隐藏源码';
+							}
+						}
+					};
+
+					await renderMermaidCards();
+					window.addEventListener('sonder:theme-change', async () => {
+						await renderMermaidCards();
+					});
+				} catch {
+					window.showToast?.('Mermaid 加载失败');
+				}
+			}
+
+			const codeBlocks = Array.from(document.querySelectorAll('.prose pre'));
+			codeBlocks.forEach((pre) => {
+				const code = pre.querySelector('code');
+				if (!code || pre.parentElement?.classList.contains('code-block')) return;
+
+				const classNames = Array.from(code.classList);
+				const languageClass = classNames.find((className) => className.startsWith('language-'));
+				const language = languageClass ? languageClass.replace('language-', '') : 'text';
+
+				const wrapper = document.createElement('div');
+				wrapper.className = 'code-block';
+				pre.parentNode?.insertBefore(wrapper, pre);
+				wrapper.appendChild(pre);
+
+				const toolbar = document.createElement('div');
+				toolbar.className = 'code-toolbar';
+
+				const languageLabel = document.createElement('span');
+				languageLabel.className = 'code-language';
+				languageLabel.textContent = formatLanguageLabel(language);
+
+				const copyCodeButton = document.createElement('button');
+				copyCodeButton.className = 'code-copy';
+				copyCodeButton.type = 'button';
+				copyCodeButton.textContent = '复制代码';
+
+				const actions = document.createElement('div');
+				actions.className = 'code-actions';
+
+				copyCodeButton.addEventListener('click', async () => {
+					try {
+						await navigator.clipboard.writeText(code.textContent || '');
+						copyCodeButton.textContent = '已复制';
+						window.showToast?.('代码已复制');
+						window.setTimeout(() => {
+							copyCodeButton.textContent = '复制代码';
+						}, 1800);
+					} catch {
+						copyCodeButton.textContent = '复制失败';
+						window.setTimeout(() => {
+							copyCodeButton.textContent = '复制代码';
+						}, 1800);
+						window.showToast?.('复制失败');
+					}
+				});
+
+				const lineCount = (code.textContent || '').split('\n').length;
+				if (lineCount > 16) {
+					wrapper.classList.add('collapsed');
+					const expandButton = document.createElement('button');
+					expandButton.className = 'code-expand';
+					expandButton.type = 'button';
+					expandButton.textContent = '展开代码';
+					expandButton.addEventListener('click', () => {
+						const collapsed = wrapper.classList.toggle('collapsed');
+						expandButton.textContent = collapsed ? '展开代码' : '收起代码';
+					});
+					actions.appendChild(expandButton);
+				}
+
+				actions.appendChild(copyCodeButton);
+				toolbar.append(languageLabel, actions);
+				wrapper.appendChild(toolbar);
+			});
 
 			const proseImages = Array.from(document.querySelectorAll('.prose img'));
 			const lightbox = document.querySelector('[data-lightbox]');
