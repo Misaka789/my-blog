@@ -22,16 +22,13 @@ const currentIndex = allPosts.findIndex((entry) => entry.id === currentPost.id);
 const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] : undefined;
 const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const categoryCount = allPosts.filter((entry) => entry.categoryName === currentPost.categoryName).length;
-const readingTime = Math.max(1, Math.round(post.body.replace(/\s+/g, '').length / 320));
-const relatedPosts = allPosts
-	.filter((entry) => entry.id !== currentPost.id)
-	.sort((a, b) => {
-		const aSameCategory = a.categoryName === currentPost.categoryName ? 1 : 0;
-		const bSameCategory = b.categoryName === currentPost.categoryName ? 1 : 0;
-		if (aSameCategory !== bSameCategory) return bSameCategory - aSameCategory;
-		return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
-	})
-	.slice(0, 3);
+const estimateReadingTime = (content: string) => {
+	const cjkCount = (content.match(/[\u4e00-\u9fff]/g) || []).length;
+	const latinWordCount = (content.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9_]+/g) || []).length;
+	return Math.max(1, Math.round(cjkCount / 300 + latinWordCount / 220));
+};
+
+const readingTime = estimateReadingTime(post.body);
 const { Content, headings } = await render(post);
 ---
 
@@ -43,7 +40,6 @@ const { Content, headings } = await render(post);
 	readingTime={readingTime}
 	previousPost={previousPost}
 	nextPost={nextPost}
-	relatedPosts={relatedPosts}
 >
 	<Content />
 </BlogPost>

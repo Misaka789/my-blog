@@ -11,7 +11,10 @@ const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
 const categories = groupPostsByCategory(posts);
+const latestPosts = posts.slice(0, 3);
 const baseURL = import.meta.env.BASE_URL;
+const formatDateTitle = (date: Date) =>
+	`发布于 ${date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}`;
 ---
 
 <!doctype html>
@@ -19,20 +22,21 @@ const baseURL = import.meta.env.BASE_URL;
 	<head>
 		<BaseHead title={`文章 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
-			.archive-hero,
-			.category-nav-shell,
-			.category-section {
-				padding: var(--space-5);
-			}
-
-			.archive-hero {
+			.search-shell {
 				display: grid;
-				gap: var(--space-2);
-				padding-top: var(--space-4);
+				gap: 0.75rem;
+				padding: var(--space-4);
+				margin-top: var(--space-3);
 			}
 
-			.archive-hero p {
-				max-width: 44rem;
+			.search-input {
+				width: 100%;
+				padding: 0.95rem 1rem;
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				background: rgba(255, 252, 247, 0.84);
+				color: var(--ink);
+				font: inherit;
 			}
 
 			.category-nav-shell {
@@ -40,6 +44,7 @@ const baseURL = import.meta.env.BASE_URL;
 				top: 5.8rem;
 				z-index: 15;
 				margin-top: var(--space-3);
+				padding: 0.9rem 1rem;
 			}
 
 			.category-nav {
@@ -53,14 +58,13 @@ const baseURL = import.meta.env.BASE_URL;
 				align-items: center;
 				justify-content: center;
 				gap: 0.45rem;
-				padding: 0.7rem 0.95rem;
+				padding: 0.62rem 0.86rem;
 				border-radius: 999px;
-				background: #fff;
+				background: rgba(255, 252, 247, 0.78);
 				border: 1px solid var(--line);
 				color: var(--ink-soft);
-				font-size: 0.88rem;
+				font-size: 0.84rem;
 				font-weight: 700;
-				transition: all var(--transition);
 			}
 
 			.category-nav a:hover {
@@ -74,18 +78,53 @@ const baseURL = import.meta.env.BASE_URL;
 				color: var(--ink-faint);
 			}
 
+			.latest-section,
 			.category-section {
 				display: grid;
 				gap: var(--space-3);
+				padding: var(--space-5);
 				margin-top: var(--space-3);
 				scroll-margin-top: 8rem;
 			}
 
+			.section-head {
+				display: grid;
+				gap: 0.75rem;
+			}
+
+			.latest-grid {
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: var(--space-3);
+			}
+
+			.latest-card {
+				display: grid;
+				gap: 0.75rem;
+				padding: 1.2rem;
+				border-radius: var(--radius-lg);
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.latest-card:hover,
+			.post-item:hover {
+				transform: translateY(-3px);
+				box-shadow: var(--shadow-md);
+			}
+
 			.category-head {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: var(--space-2);
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: var(--space-3);
+				align-items: end;
+			}
+
+			.category-copy {
+				display: grid;
+				gap: 0.75rem;
+				max-width: 40rem;
 			}
 
 			.category-head h2 {
@@ -109,16 +148,10 @@ const baseURL = import.meta.env.BASE_URL;
 				gap: var(--space-3);
 				align-items: start;
 				padding: var(--space-4);
-				background: var(--paper-strong);
+				background: rgba(255, 252, 247, 0.72);
 				border: 1px solid var(--line);
 				border-radius: var(--radius-lg);
 				box-shadow: var(--shadow-sm);
-				transition: all var(--transition);
-			}
-
-			.post-item:hover {
-				transform: translateY(-2px);
-				box-shadow: var(--shadow-md);
 			}
 
 			.post-date {
@@ -144,12 +177,13 @@ const baseURL = import.meta.env.BASE_URL;
 			}
 
 			@media (max-width: 720px) {
-				.archive-hero,
-				.category-nav-shell,
+				.search-shell,
+				.latest-section,
 				.category-section {
 					padding: var(--space-4);
 				}
 
+				.latest-grid,
 				.category-head,
 				.post-item {
 					grid-template-columns: 1fr;
@@ -164,10 +198,9 @@ const baseURL = import.meta.env.BASE_URL;
 	<body>
 		<Header />
 		<main>
-			<section class="archive-hero soft-panel">
-				<span class="section-tag">文章归档</span>
-				<h1>文章档案</h1>
-				<p>你可以先按主题快速定位，再直接进入文章列表开始阅读。</p>
+			<section class="search-shell soft-panel">
+				<span class="section-tag">站内搜索</span>
+				<input class="search-input" type="search" placeholder="搜索标题、描述或分类" data-search-input />
 			</section>
 
 			<section class="category-nav-shell soft-panel">
@@ -181,15 +214,36 @@ const baseURL = import.meta.env.BASE_URL;
 				</div>
 			</section>
 
+			<section class="latest-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">最近更新</span>
+					<h2>如果是第一次来，建议先从这里开始</h2>
+				</div>
+				<div class="latest-grid">
+					{latestPosts.map((post) => (
+						<a class="latest-card" href={`${baseURL}blog/${post.id}/`} title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
+							<span class="eyebrow">{post.categoryName}</span>
+							<h3>{post.data.title}</h3>
+							<p>{post.data.description}</p>
+							<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
+						</a>
+					))}
+				</div>
+			</section>
+
 			{categories.map((category) => (
-				<section class="category-section soft-panel" id={toCategoryId(category.name)}>
+				<section class="category-section soft-panel" id={toCategoryId(category.name)} data-category-section>
 					<div class="category-head">
-						<h2>{category.name}</h2>
+						<div class="category-copy">
+							<span class="section-tag">{category.name}</span>
+							<h2>{category.name}</h2>
+							<p>{category.summary} {category.readerHint}</p>
+						</div>
 						<div class="post-count">{category.count} 篇</div>
 					</div>
 					<div class="post-list">
 						{category.posts.map((post) => (
-							<a href={`${baseURL}blog/${post.id}/`} class="post-item">
+							<a href={`${baseURL}blog/${post.id}/`} class="post-item" title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
 								<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
 								<div class="post-content">
 									<h3>{post.data.title}</h3>
@@ -203,5 +257,24 @@ const baseURL = import.meta.env.BASE_URL;
 			))}
 		</main>
 		<Footer />
+		<script>
+			const input = document.querySelector('[data-search-input]');
+			const items = Array.from(document.querySelectorAll('[data-search-item]'));
+			const sections = Array.from(document.querySelectorAll('[data-category-section]'));
+
+			const updateSearch = () => {
+				const query = input?.value.trim().toLowerCase() || '';
+				items.forEach((item) => {
+					const text = item.getAttribute('data-search-text')?.toLowerCase() || '';
+					item.style.display = !query || text.includes(query) ? '' : 'none';
+				});
+				sections.forEach((section) => {
+					const visible = Array.from(section.querySelectorAll('[data-search-item]')).some((item) => item.style.display !== 'none');
+					section.style.display = visible || !query ? '' : 'none';
+				});
+			};
+
+			input?.addEventListener('input', updateSearch);
+		</script>
 	</body>
 </html>

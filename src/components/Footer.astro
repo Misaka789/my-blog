@@ -6,16 +6,20 @@ const baseURL = import.meta.env.BASE_URL;
 <footer class="site-footer">
 	<div class="shell footer-shell">
 		<div class="footer-brand">
+			<p class="eyebrow">Writing Desk</p>
 			<h2>sonder</h2>
-			<p>记录学习过程、实践复盘，以及那些值得反复回看的成长片段。</p>
+			<p>记录学习过程、实践复盘，以及那些值得在几年后再回来翻看的成长片段。</p>
+			<p class="footer-note">写给当下，也写给未来的自己。</p>
 			<p class="copyright">&copy; {today.getFullYear()} sonder</p>
 		</div>
-		<div class="footer-links">
-			<a href={baseURL}>首页</a>
-			<a href={`${baseURL}blog`}>文章</a>
-			<a href={`${baseURL}about`}>关于</a>
-			<a href="mailto:3192422357@qq.com">邮箱</a>
-			<a href={`${baseURL}rss.xml`}>RSS</a>
+		<div class="footer-meta">
+			<div class="footer-links">
+				<a href={baseURL}>首页</a>
+				<a href={`${baseURL}blog`}>文章</a>
+				<a href={`${baseURL}about`}>关于</a>
+				<a href="mailto:3192422357@qq.com">邮箱</a>
+				<a href={`${baseURL}rss.xml`}>RSS</a>
+			</div>
 		</div>
 	</div>
 </footer>
@@ -29,7 +33,7 @@ const baseURL = import.meta.env.BASE_URL;
 		display: grid;
 		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
 		gap: var(--space-5);
-		padding-top: var(--space-6);
+		padding: var(--space-6) 0 0;
 		margin-top: var(--space-7);
 		border-top: 1px solid var(--line);
 	}
@@ -41,15 +45,24 @@ const baseURL = import.meta.env.BASE_URL;
 	}
 
 	.footer-brand h2 {
-		font-size: 1.45rem;
+		font-size: 1.7rem;
 		font-family: var(--font-display);
-		letter-spacing: -0.02em;
+		letter-spacing: -0.04em;
+	}
+
+	.footer-note {
+		color: var(--ink);
+	}
+
+	.footer-meta {
+		display: grid;
+		align-content: start;
 	}
 
 	.footer-links {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, max-content));
-		justify-content: end;
+		justify-content: start;
 		align-content: start;
 		column-gap: var(--space-5);
 		row-gap: var(--space-2);
@@ -79,7 +92,6 @@ const baseURL = import.meta.env.BASE_URL;
 
 		.footer-links {
 			grid-template-columns: repeat(2, minmax(0, max-content));
-			justify-content: start;
 		}
 	}
 </style>

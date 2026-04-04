@@ -19,6 +19,15 @@ const withBase = (path: string) => `${baseURL}${path.replace(/^\//, '')}`;
 const { title, description, image = FallbackImage } = Astro.props;
 ---
 
+<script is:inline>
+	(() => {
+		const stored = localStorage.getItem('sonder-theme');
+		const preferredDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		const theme = stored || (preferredDark ? 'dark' : 'light');
+		document.documentElement.dataset.theme = theme;
+	})();
+</script>
+
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -29,7 +38,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 	rel="alternate"
 	type="application/rss+xml"
 	title={SITE_TITLE}
-	href={new URL('rss.xml', Astro.site)}
+	href={new URL(withBase('/rss.xml'), Astro.site)}
 />
 <meta name="generator" content={Astro.generator} />
 

@@ -21,7 +21,6 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	readingTime?: number;
 	previousPost?: CategorizedPost;
 	nextPost?: CategorizedPost;
-	relatedPosts?: CategorizedPost[];
 };
 
 const {
@@ -36,7 +35,6 @@ const {
 	readingTime = 1,
 	previousPost,
 	nextPost,
-	relatedPosts = [],
 } = Astro.props;
 
 const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
@@ -65,8 +63,25 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				display: block;
 				height: 100%;
 				width: var(--progress, 0%);
-				background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+				background: linear-gradient(90deg, var(--accent-warm), var(--accent));
 				transition: width 100ms linear;
+			}
+
+			.progress-badge {
+				position: fixed;
+				right: 1rem;
+				bottom: 1rem;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 3.4rem;
+				padding: 0.7rem 0.8rem;
+				border-radius: 999px;
+				background: rgba(22, 31, 26, 0.9);
+				color: white;
+				font-size: 0.82rem;
+				font-weight: 700;
+				z-index: 90;
 			}
 
 			.article-shell {
@@ -79,22 +94,25 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			.hero-media,
 			.article-body,
 			.article-toc,
-			.article-nav,
-			.related-section {
+			.article-nav {
 				padding: var(--space-5);
 			}
 
 			.article-hero {
 				display: grid;
-				gap: var(--space-3);
+				gap: 0.9rem;
 			}
 
 			.article-hero h1 {
 				max-width: 18ch;
+				font-size: clamp(2rem, 3.4vw, 3rem);
+				line-height: 1.04;
+				letter-spacing: -0.045em;
 			}
 
 			.article-hero p {
-				max-width: 46rem;
+				max-width: 38rem;
+				font-size: 0.98rem;
 			}
 
 			.meta-row {
@@ -110,13 +128,13 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				padding: 0.72rem 0.92rem;
+				padding: 0.66rem 0.84rem;
 				border-radius: 999px;
-				background: #fff;
+				background: rgba(255, 252, 247, 0.8);
 				border: 1px solid var(--line);
 				color: var(--ink-soft);
 				font-weight: 700;
-				font-size: 0.9rem;
+				font-size: 0.86rem;
 			}
 
 			.meta-button {
@@ -137,7 +155,18 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			.hero-media :global(img) {
 				width: 100%;
 				object-fit: cover;
+				aspect-ratio: 1 / 0.6;
 				border-radius: calc(var(--radius-xl) - 8px);
+			}
+
+			.prose :global(img) {
+				cursor: zoom-in;
+				transition: transform var(--transition), box-shadow var(--transition);
+			}
+
+			.prose :global(img:hover) {
+				transform: translateY(-1px);
+				box-shadow: var(--shadow-sm);
 			}
 
 			.article-content {
@@ -148,22 +177,42 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			}
 
 			.article-content.has-toc {
-				grid-template-columns: minmax(0, 1fr) 270px;
+				grid-template-columns: 220px minmax(0, 1fr);
+				gap: var(--space-4);
+			}
+
+			.article-body {
+				background: rgba(255, 253, 249, 0.96);
+				border-radius: 16px;
+				border: 1px solid rgba(116, 108, 94, 0.12);
+				box-shadow: 0 10px 24px rgba(43, 38, 30, 0.04);
 			}
 
 			.prose {
 				display: grid;
-				gap: 1rem;
+				gap: 1.05rem;
+				font-size: 1rem;
+				line-height: 1.9;
 			}
 
 			.prose :global(h2),
 			.prose :global(h3),
 			.prose :global(h4) {
 				scroll-margin-top: 6rem;
+				font-family: var(--font-display);
+				letter-spacing: -0.035em;
 			}
 
 			.prose :global(h2) {
-				margin-top: 2rem;
+				margin-top: 2.4rem;
+				font-size: clamp(1.6rem, 2.6vw, 2.15rem);
+				line-height: 1.12;
+			}
+
+			.prose :global(h3) {
+				margin-top: 1.5rem;
+				font-size: clamp(1.2rem, 2vw, 1.45rem);
+				line-height: 1.18;
 			}
 
 			.prose :global(p),
@@ -176,30 +225,69 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			.prose :global(a) {
 				color: var(--accent-strong);
 				text-decoration: underline;
-				text-decoration-color: rgba(104, 134, 111, 0.35);
+				text-decoration-color: rgba(96, 120, 103, 0.32);
 				text-underline-offset: 0.18em;
+			}
+
+			.prose :global(p + p) {
+				margin-top: 0.15rem;
+			}
+
+			.prose :global(ul),
+			.prose :global(ol) {
+				padding-left: 1.15rem;
+			}
+
+			.prose :global(li) {
+				padding-left: 0.05rem;
+			}
+
+			.prose :global(pre) {
+				max-width: 100%;
 			}
 
 			.article-toc {
 				position: sticky;
 				top: 6.1rem;
 				display: grid;
-				gap: 0.9rem;
+				gap: 0.45rem;
+				align-self: start;
+				padding: 0.35rem 0 0 0;
+				background: transparent;
+				border: 0;
+				box-shadow: none;
+				backdrop-filter: none;
 			}
 
 			.toc-list {
 				display: grid;
-				gap: 0.65rem;
+				gap: 0.35rem;
+				padding-left: 0.85rem;
+				border-left: 1px solid var(--line);
 			}
 
 			.toc-link {
 				justify-content: start;
 				width: 100%;
 				text-align: left;
+				padding: 0.5rem 0.2rem;
+				border-radius: 6px;
+				border: 0;
+				background: transparent;
+				box-shadow: none;
+				font-weight: 600;
+				font-size: 0.88rem;
+			}
+
+			.toc-link.active {
+				color: var(--accent-strong);
+				background: rgba(93, 154, 121, 0.06);
 			}
 
 			.toc-link.depth-3 {
-				padding-left: 1.18rem;
+				padding-left: 1.15rem;
+				font-size: 0.82rem;
+				color: var(--ink-faint);
 			}
 
 			.back-link {
@@ -209,7 +297,20 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				margin-top: 1.2rem;
 				padding: 0.8rem 1rem;
 				border-radius: 999px;
-				background: #fff;
+				background: rgba(255, 252, 247, 0.82);
+				border: 1px solid var(--line);
+				color: var(--ink-soft);
+				font-weight: 700;
+			}
+
+			.top-link {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				margin-top: 0.9rem;
+				padding: 0.76rem 0.95rem;
+				border-radius: 999px;
+				background: transparent;
 				border: 1px solid var(--line);
 				color: var(--ink-soft);
 				font-weight: 700;
@@ -221,74 +322,59 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				gap: var(--space-3);
 			}
 
-			.nav-card,
-			.related-card {
+			.nav-card {
 				display: grid;
 				gap: 0.65rem;
 				padding: var(--space-4);
-				background: var(--paper-strong);
+				background: rgba(255, 252, 247, 0.78);
 				border: 1px solid var(--line);
-				border-radius: var(--radius-lg);
+				border-radius: 12px;
 				box-shadow: var(--shadow-sm);
 			}
 
-			.nav-card span,
-			.related-card span {
+			.image-lightbox {
+				position: fixed;
+				inset: 0;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				padding: 2rem;
+				background: rgba(0, 0, 0, 0.72);
+				z-index: 120;
+			}
+
+			.image-lightbox.open {
+				display: flex;
+			}
+
+			.image-lightbox img {
+				max-width: min(1100px, 100%);
+				max-height: 86vh;
+				border-radius: 12px;
+			}
+
+			.nav-card span {
 				font-size: 0.78rem;
 				font-weight: 700;
 				letter-spacing: 0.08em;
 				color: var(--ink-faint);
 			}
 
-			.related-section {
-				display: grid;
-				gap: var(--space-3);
-			}
-
-			.related-grid {
-				display: grid;
-				grid-template-columns: repeat(3, minmax(0, 1fr));
-				gap: var(--space-3);
-			}
-
-			.related-card h3,
 			.nav-card h3 {
 				font-size: 1.18rem;
 				line-height: 1.18;
 			}
 
-			.post-meta {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-				font-size: 0.84rem;
-				font-weight: 700;
-				color: var(--ink-faint);
-			}
-
-			.post-meta::before {
-				content: '';
-				width: 0.42rem;
-				height: 0.42rem;
-				border-radius: 999px;
-				background: var(--accent-warm);
-			}
-
-			.section-head {
-				display: grid;
-				gap: 0.75rem;
-			}
-
 			@media (max-width: 960px) {
 				.article-content.has-toc,
-				.article-nav,
-				.related-grid {
+				.article-nav {
 					grid-template-columns: 1fr;
 				}
 
 				.article-toc {
 					position: static;
 					order: -1;
+					padding-top: 0;
 				}
 			}
 
@@ -301,15 +387,39 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				.hero-media,
 				.article-body,
 				.article-toc,
-				.article-nav,
-				.related-section {
+				.article-nav {
 					padding: var(--space-4);
+				}
+
+				.article-hero h1 {
+					font-size: clamp(1.75rem, 8vw, 2.35rem);
+				}
+
+				.meta-row {
+					gap: 0.5rem;
+				}
+
+				.meta-pill,
+				.meta-button,
+				.category-pill {
+					font-size: 0.8rem;
+					padding: 0.58rem 0.72rem;
+				}
+
+				.prose {
+					font-size: 0.98rem;
+					line-height: 1.82;
+				}
+
+				.prose :global(h2) {
+					margin-top: 2rem;
 				}
 			}
 		</style>
 	</head>
 	<body>
 		<div class="progress" aria-hidden="true"></div>
+		<div class="progress-badge" data-progress-badge>0%</div>
 		<Header />
 		<main>
 			<article class="article-shell">
@@ -334,26 +444,23 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				)}
 
 				<div class:list={['article-content', { 'has-toc': tocItems.length > 0 }]}>
-					<div class="article-body soft-panel">
-						<div class="prose">
-							<slot />
-						</div>
-						<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">返回文章归档</a>
-					</div>
-
 					{tocItems.length > 0 && (
 						<aside class="article-toc soft-panel">
-							<div class="section-head">
-								<span class="section-tag">目录</span>
-								<h2>这篇文章会讲什么</h2>
-							</div>
 							<div class="toc-list">
 								{tocItems.map((heading) => (
-									<a class={`toc-link depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>
+									<a class={`toc-link depth-${heading.depth}`} href={`#${heading.slug}`} data-toc-link={heading.slug}>{heading.text}</a>
 								))}
 							</div>
 						</aside>
 					)}
+
+					<div class="article-body soft-panel">
+						<div class="prose">
+							<slot />
+						</div>
+						<a href={`${import.meta.env.BASE_URL}blog`} class="back-link">返回文章列表</a>
+						<a href="#top" class="top-link" data-top-link>回到顶部</a>
+					</div>
 				</div>
 
 				{(previousPost || nextPost) && (
@@ -378,56 +485,102 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 						)}
 					</section>
 				)}
-
-				{relatedPosts.length > 0 && (
-					<section class="related-section soft-panel">
-						<div class="section-head">
-							<span class="section-tag">继续阅读</span>
-							<h2>接着看看这些文章</h2>
-							<p>如果这篇对你有帮助，下面这些内容大概率也会相关。</p>
-						</div>
-						<div class="related-grid">
-							{relatedPosts.map((post) => (
-								<a class="related-card" href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
-									<span>{post.categoryName}</span>
-									<h3>{post.data.title}</h3>
-									<p>{post.data.description}</p>
-									<div class="post-meta"><FormattedDate date={post.data.pubDate} /></div>
-								</a>
-							))}
-						</div>
-					</section>
-				)}
 			</article>
 		</main>
 		<Footer />
+		<div class="image-lightbox" data-lightbox>
+			<img alt="" data-lightbox-image />
+		</div>
 		<script>
 			const copyButton = document.querySelector('[data-copy-link]');
 			if (copyButton) {
 				copyButton.addEventListener('click', async () => {
-					const originalText = copyButton.textContent;
 					try {
 						await navigator.clipboard.writeText(window.location.href);
-						copyButton.textContent = '链接已复制';
+						window.showToast?.('链接已复制');
 					} catch {
-						copyButton.textContent = '复制失败';
+						window.showToast?.('复制失败');
 					}
-					window.setTimeout(() => {
-						copyButton.textContent = originalText;
-					}, 1200);
 				});
 			}
 
 			const progress = document.querySelector('.progress');
+			const progressBadge = document.querySelector('[data-progress-badge]');
 			const updateProgress = () => {
 				if (!progress) return;
 				const scrollTop = window.scrollY;
 				const max = document.documentElement.scrollHeight - window.innerHeight;
 				const ratio = max <= 0 ? 0 : Math.min(1, Math.max(0, scrollTop / max));
+				const percent = `${Math.round(ratio * 100)}%`;
 				progress.style.setProperty('--progress', `${(ratio * 100).toFixed(2)}%`);
+				if (progressBadge) progressBadge.textContent = percent;
 			};
 			window.addEventListener('scroll', updateProgress, { passive: true });
 			updateProgress();
+
+			const tocLinks = Array.from(document.querySelectorAll('[data-toc-link]'));
+			const headingTargets = tocLinks
+				.map((link) => {
+					const slug = link.getAttribute('data-toc-link');
+					const target = slug ? document.getElementById(slug) : null;
+					return target ? { link, target } : null;
+				})
+				.filter(Boolean);
+
+			if (headingTargets.length > 0) {
+				const activateLink = (id) => {
+					headingTargets.forEach(({ link, target }) => {
+						link.classList.toggle('active', target.id === id);
+					});
+				};
+
+				const observer = new IntersectionObserver(
+					(entries) => {
+						const visible = entries
+							.filter((entry) => entry.isIntersecting)
+							.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+						if (visible[0]?.target?.id) {
+							activateLink(visible[0].target.id);
+						}
+					},
+					{
+						rootMargin: '-20% 0px -65% 0px',
+						threshold: [0, 1],
+					},
+				);
+
+				headingTargets.forEach(({ target }) => observer.observe(target));
+				activateLink(headingTargets[0].target.id);
+			}
+
+			const proseImages = Array.from(document.querySelectorAll('.prose img'));
+			const lightbox = document.querySelector('[data-lightbox]');
+			const lightboxImage = document.querySelector('[data-lightbox-image]');
+			const topLink = document.querySelector('[data-top-link]');
+
+			topLink?.addEventListener('click', (event) => {
+				event.preventDefault();
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
+
+			proseImages.forEach((image) => {
+				image.addEventListener('click', () => {
+					if (!lightbox || !lightboxImage) return;
+					lightboxImage.src = image.currentSrc || image.src;
+					lightboxImage.alt = image.alt || '';
+					lightbox.classList.add('open');
+				});
+			});
+
+			lightbox?.addEventListener('click', () => {
+				lightbox.classList.remove('open');
+			});
+
+			window.addEventListener('keydown', (event) => {
+				if (event.key === 'Escape') {
+					lightbox?.classList.remove('open');
+				}
+			});
 		</script>
 	</body>
 </html>

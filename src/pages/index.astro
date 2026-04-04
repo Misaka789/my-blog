@@ -6,14 +6,19 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
-import { getPostCategory } from '../data/categories';
+import { getPostCategory, groupPostsByCategory, toCategoryId } from '../data/categories';
 import HeroImage from '../assets/spirited-princess.jpg';
 
 const baseURL = import.meta.env.BASE_URL;
 const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
-const fromHereHref = posts[0] ? `${baseURL}blog/${posts[0].id}/` : `${baseURL}blog`;
+const featuredPost = posts[0];
+const recentPosts = posts.slice(1, 3);
+const categories = groupPostsByCategory(posts).slice(0, 2);
+const fromHereHref = featuredPost ? `${baseURL}blog/${featuredPost.id}/` : `${baseURL}blog`;
+const formatDateTitle = (date: Date) =>
+	`发布于 ${date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}`;
 ---
 
 <!doctype html>
@@ -23,29 +28,60 @@ const fromHereHref = posts[0] ? `${baseURL}blog/${posts[0].id}/` : `${baseURL}bl
 		<style>
 			.hero {
 				display: grid;
-				grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-				gap: var(--space-5);
-				align-items: start;
+				grid-template-columns: minmax(0, 0.94fr) minmax(360px, 1.06fr);
+				gap: var(--space-6);
+				align-items: stretch;
 				padding: var(--space-5);
-				padding-top: var(--space-4);
+				padding-top: var(--space-5);
+				overflow: hidden;
 			}
 
 			.hero-left {
 				display: grid;
 				gap: var(--space-4);
+				align-content: start;
 			}
 
-			.hero-left h1 {
-				max-width: 16ch;
-				font-size: clamp(2.05rem, 3.2vw, 3rem);
-				line-height: 1.18;
-				letter-spacing: -0.03em;
+			.hero-intro {
+				display: grid;
+				gap: 0.95rem;
+				max-width: 31rem;
 			}
 
-			.hero-left p {
-				max-width: 34rem;
-				font-size: 1rem;
-				color: var(--ink-soft);
+			.hero-kicker {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.8rem;
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
+			}
+
+			.hero-kicker::before {
+				content: "";
+				width: 2.8rem;
+				height: 1px;
+				background: linear-gradient(90deg, var(--accent), transparent);
+			}
+
+			.hero-intro h1 {
+				max-width: 9ch;
+				font-size: clamp(3rem, 5vw, 4.8rem);
+				line-height: 0.98;
+				letter-spacing: -0.06em;
+			}
+
+			.hero-intro h1 span {
+				display: block;
+				color: var(--accent-strong);
+			}
+
+			.hero-intro p {
+				max-width: 28rem;
+				font-size: 0.98rem;
+				line-height: 1.74;
 			}
 
 			.hero-actions {
@@ -58,115 +94,183 @@ const fromHereHref = posts[0] ? `${baseURL}blog/${posts[0].id}/` : `${baseURL}bl
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				padding: 0.84rem 1.1rem;
+				padding: 0.84rem 1.08rem;
 				border-radius: 999px;
 				font-weight: 700;
 				border: 1px solid var(--line);
-				background: #fff;
-				transition: all var(--transition);
+				background: rgba(252, 255, 252, 0.78);
 			}
 
 			.hero-actions a.primary {
 				background: var(--accent);
-				color: #fff;
+				color: white;
 				border-color: transparent;
 			}
 
-			.hero-actions a:hover {
+			.hero-actions a:hover,
+			.post-card:hover,
+			.category-card:hover {
 				transform: translateY(-2px);
 				box-shadow: var(--shadow-sm);
 			}
 
-			.directory {
+			.overview-strip {
 				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
 				gap: var(--space-3);
-				padding: var(--space-4);
-				border-radius: var(--radius-lg);
-				background: var(--paper-strong);
+			}
+
+			.stat-card {
+				display: grid;
+				gap: 0.4rem;
+				padding: 1rem 1.1rem;
+				border-radius: var(--radius-md);
+				background: rgba(252, 255, 252, 0.78);
 				border: 1px solid var(--line);
 			}
 
-			.directory h2 {
+			.stat-card span {
+				font-size: 0.78rem;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--ink-faint);
+			}
+
+			.stat-card strong {
 				font-size: 1.2rem;
-				letter-spacing: -0.01em;
-			}
-
-			.directory-list {
-				display: grid;
-				gap: 0.7rem;
-			}
-
-			.directory-item {
-				display: grid;
-				grid-template-columns: auto 1fr auto;
-				align-items: center;
-				gap: 0.65rem;
-				padding: 0.7rem 0.8rem;
-				border-radius: var(--radius-md);
-				border: 1px solid transparent;
-			}
-
-			.directory-item:hover {
-				background: #fff;
-				border-color: var(--line);
-				box-shadow: var(--shadow-sm);
-				transform: translateY(-1px);
-			}
-
-			.order {
-				font-size: 0.76rem;
-				color: var(--ink-faint);
-				font-weight: 700;
-				letter-spacing: 0.08em;
-			}
-
-			.title {
-				font-weight: 700;
-				color: var(--ink);
-				line-height: 1.35;
-			}
-
-			.date {
-				font-size: 0.84rem;
-				color: var(--ink-faint);
-				font-weight: 600;
-				white-space: nowrap;
+				line-height: 1.1;
 			}
 
 			.hero-right {
 				display: grid;
-				gap: 0.7rem;
+				gap: 1.1rem;
+				align-self: stretch;
 			}
 
-			.hero-right :global(img) {
+			.feature-card {
+				display: grid;
+				grid-template-rows: auto auto;
+				gap: 1.15rem;
+				padding: 1.1rem;
+				background: linear-gradient(180deg, rgba(247, 255, 250, 0.96), rgba(238, 249, 243, 0.92));
+				border: 1px solid var(--line);
+				border-radius: var(--radius-xl);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.feature-card :global(img) {
 				width: 100%;
-				aspect-ratio: 1 / 1.03;
+				aspect-ratio: 1 / 0.96;
 				object-fit: cover;
 				border-radius: calc(var(--radius-xl) - 8px);
 			}
 
-			.caption {
-				font-size: 0.9rem;
+			.quote-card {
+				display: grid;
+				gap: 0.25rem;
+				padding: 0 0.2rem;
+			}
+
+			.quote-card strong {
+				font-family: var(--font-display);
+				font-size: 1.55rem;
+				line-height: 1;
+				letter-spacing: -0.06em;
+				color: var(--accent-strong);
+			}
+
+			.quote-card span {
+				font-size: 0.76rem;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
 				color: var(--ink-faint);
 			}
 
+			.feed-section,
+			.categories-section {
+				display: grid;
+				gap: var(--space-4);
+				margin-top: var(--space-4);
+				padding: var(--space-4);
+			}
+
+			.section-head {
+				display: grid;
+				gap: 0.8rem;
+			}
+
+			.feed-grid,
+			.categories-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: var(--space-3);
+			}
+
+			.post-card,
+			.category-card {
+				display: grid;
+				gap: 0.8rem;
+				padding: 1.1rem;
+				background: rgba(255, 252, 247, 0.76);
+				border: 1px solid var(--line);
+				border-radius: var(--radius-lg);
+				box-shadow: var(--shadow-sm);
+			}
+
+			.post-card-top,
+			.category-card-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.8rem;
+				flex-wrap: wrap;
+			}
+
+			.post-card h3,
+			.category-card h3 {
+				line-height: 1.14;
+			}
+
+			.post-card p,
+			.category-card p {
+				font-size: 0.95rem;
+			}
+
+			.category-card strong {
+				font-size: 1rem;
+			}
+
+			.category-link {
+				display: inline-flex;
+				align-items: center;
+				width: fit-content;
+				font-weight: 700;
+				color: var(--accent-strong);
+			}
+
 			@media (max-width: 960px) {
-				.hero {
+				.hero,
+				.feed-grid,
+				.categories-grid {
 					grid-template-columns: 1fr;
+				}
+
+				.hero-intro h1 {
+					max-width: 10ch;
 				}
 			}
 
 			@media (max-width: 720px) {
-				.hero {
+				.hero,
+				.feed-section,
+				.categories-section {
 					padding: var(--space-4);
 				}
 
-				.directory-item {
-					grid-template-columns: auto 1fr;
-				}
-
-				.date {
-					display: none;
+				.overview-strip {
+					grid-template-columns: 1fr;
 				}
 			}
 		</style>
@@ -176,34 +280,79 @@ const fromHereHref = posts[0] ? `${baseURL}blog/${posts[0].id}/` : `${baseURL}bl
 		<main>
 			<section class="hero soft-panel">
 				<div class="hero-left">
-					<span class="section-tag">写给正在学习的你</span>
-					<h1>重要的不是立刻有答案，而是把每一步思考写清楚。</h1>
-					<p>这里是一份持续更新的学习档案，重点放在真实过程和可复用经验。</p>
-					<div class="hero-actions">
-						<a class="primary" href={fromHereHref}>从这里开始</a>
-						<a href={`${baseURL}blog`}>浏览文章目录</a>
-						<a href={`${baseURL}about`}>关于我</a>
+					<div class="hero-intro">
+						<div class="hero-kicker">A Learning Journal</div>
+						<h1>把思考写下来<span>让成长留下痕迹</span></h1>
+						<p>记录问题、过程和结论，让内容能回看，也能复用。</p>
+						<div class="hero-actions">
+							<a class="primary" href={fromHereHref}>从推荐文章开始</a>
+							<a href={`${baseURL}blog`}>浏览全部文章</a>
+							<a href={`${baseURL}about`}>关于我</a>
+						</div>
 					</div>
 
-					<div class="directory">
-						<h2>文章目录</h2>
-						<div class="directory-list">
-							{posts.map((post, index) => (
-								<a class="directory-item" href={`${baseURL}blog/${post.id}/`}>
-									<span class="order">{String(index + 1).padStart(2, '0')}</span>
-									<span class="title">{post.data.title}</span>
-									<span class="date"><FormattedDate date={post.data.pubDate} /></span>
-								</a>
-							))}
+					<div class="overview-strip">
+						<div class="stat-card">
+							<span>Published</span>
+							<strong>{posts.length} 篇文章</strong>
+						</div>
+						<div class="stat-card">
+							<span>Topics</span>
+							<strong>{groupPostsByCategory(posts).length} 个主题</strong>
 						</div>
 					</div>
 				</div>
 
 				<aside class="hero-right">
-					<Image src={HeroImage} alt="幽灵公主主题图" width={1200} height={1200} />
-					<p class="caption">“活下去。” —— 宫崎骏《幽灵公主》</p>
+					<div class="feature-card">
+						<Image src={HeroImage} alt="幽灵公主主题图" width={1200} height={980} />
+						<div class="quote-card">
+							<strong>“活下去”</strong>
+							<span>宫崎骏《幽灵公主》</span>
+						</div>
+					</div>
 				</aside>
 			</section>
+
+			<section class="feed-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">最近更新</span>
+					<h2>最近写的两篇</h2>
+				</div>
+				<div class="feed-grid">
+					{recentPosts.map((post) => (
+						<a class="post-card" href={`${baseURL}blog/${post.id}/`} title={formatDateTitle(post.data.pubDate)}>
+							<div class="post-card-top">
+								<span class="eyebrow">{post.categoryName}</span>
+								<span class="muted"><FormattedDate date={post.data.pubDate} /></span>
+							</div>
+							<h3>{post.data.title}</h3>
+							<p>{post.data.description}</p>
+						</a>
+					))}
+				</div>
+			</section>
+
+			<section class="categories-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">主题浏览</span>
+					<h2>从主题开始阅读</h2>
+				</div>
+				<div class="categories-grid">
+					{categories.map((category) => (
+						<a class="category-card" href={`${baseURL}blog#${toCategoryId(category.name)}`} title={category.latest ? formatDateTitle(category.latest.data.pubDate) : undefined}>
+							<div class="category-card-top">
+								<span class="eyebrow">{category.name}</span>
+								<span class="muted">{category.count} 篇</span>
+							</div>
+							<strong>{category.latest?.data.title ?? '持续整理中'}</strong>
+							<p>{category.summary}</p>
+							<span class="category-link">进入这个主题</span>
+						</a>
+					))}
+				</div>
+			</section>
+
 		</main>
 		<Footer />
 	</body>
