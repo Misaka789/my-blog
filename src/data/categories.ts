@@ -1,4 +1,4 @@
-﻿import type { CollectionEntry } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 
 export type CategoryMeta = {
 	summary: string;
@@ -16,7 +16,6 @@ const toDisplayName = (value: string) => {
 	const normalized = value.replace(/[-_]+/g, ' ').trim();
 	if (!normalized) return UNCATEGORIZED_LABEL;
 	if (/[\u4e00-\u9fa5]/.test(normalized)) return normalized;
-
 	return normalized.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
 };
 
@@ -44,19 +43,19 @@ export const sortCategoryNames = (names: string[]) =>
 		return a.localeCompare(b, 'zh-CN');
 	});
 
-export const getCategoryMeta = (name: string, count = 0): CategoryMeta => ({
+export const getCategoryMeta = (_name: string, count = 0): CategoryMeta => ({
 	summary:
 		count > 1
-			? `这里收录的是「${name}」方向的学习记录与实践文章。`
-			: `这里会慢慢收录「${name}」方向的学习记录与实践文章。`,
+			? `这个主题下已经有 ${count} 篇文章，适合按顺序慢慢读。`
+			: '这个主题还在持续更新，先从这篇开始就很好。',
 	readerHint:
 		count > 1
-			? '如果你想快速进入这个主题，可以先从最近更新的一篇开始。'
-			: '这个分类刚开始建立，后面会继续往里补内容。',
+			? '建议先从最近更新的一篇开始，再顺着相关文章往下读。'
+			: '先读完这篇，再去看看其他主题也会很有收获。',
 });
 
-export const groupPostsByCategory = (posts: CollectionEntry<'blog'>[]) => {
-	const categorizedPosts = posts.map(getPostCategory);
+export const groupPostsByCategory = (posts: Array<CollectionEntry<'blog'> | CategorizedPost>) => {
+	const categorizedPosts = posts.map((post) => ('categoryName' in post ? post : getPostCategory(post)));
 	const groups = categorizedPosts.reduce((map, post) => {
 		const current = map.get(post.categoryName) ?? [];
 		current.push(post);

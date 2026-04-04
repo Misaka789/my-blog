@@ -18,9 +18,13 @@ const currentPost = getPostCategory(post);
 const allPosts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
+const currentIndex = allPosts.findIndex((entry) => entry.id === currentPost.id);
+const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] : undefined;
+const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const categoryCount = allPosts.filter((entry) => entry.categoryName === currentPost.categoryName).length;
+const readingTime = Math.max(1, Math.round(post.body.replace(/\s+/g, '').length / 320));
 const relatedPosts = allPosts
-	.filter((entry) => entry.id !== post.id)
+	.filter((entry) => entry.id !== currentPost.id)
 	.sort((a, b) => {
 		const aSameCategory = a.categoryName === currentPost.categoryName ? 1 : 0;
 		const bSameCategory = b.categoryName === currentPost.categoryName ? 1 : 0;
@@ -28,13 +32,17 @@ const relatedPosts = allPosts
 		return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
 	})
 	.slice(0, 3);
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 ---
 
 <BlogPost
 	{...post.data}
 	category={currentPost.categoryName}
 	categorySummary={getCategoryMeta(currentPost.categoryName, categoryCount).summary}
+	headings={headings}
+	readingTime={readingTime}
+	previousPost={previousPost}
+	nextPost={nextPost}
 	relatedPosts={relatedPosts}
 >
 	<Content />

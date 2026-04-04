@@ -1,10 +1,23 @@
-﻿---
+---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { getPostCategory, groupPostsByCategory } from '../data/categories';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import ProfileImage from '../assets/profile.jpg';
+
+const baseURL = import.meta.env.BASE_URL;
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.map(getPostCategory);
+const categories = groupPostsByCategory(posts);
+const latestPost = posts[0];
+const topCategories = categories.slice(0, 3).map((item) => item.name).join(' / ') || '持续整理中';
+const latestDateLabel = latestPost
+	? latestPost.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+	: '待更新';
 ---
 
 <!doctype html>
@@ -12,110 +25,169 @@ import ProfileImage from '../assets/profile.jpg';
 	<head>
 		<BaseHead title={`关于 - ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={ProfileImage} />
 		<style>
-			.about-hero {
-				display: grid;
-				grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
-				gap: 1.5rem;
-				align-items: start;
-				padding: 1rem 0 2rem;
+			.about-hero,
+			.focus-section,
+			.timeline-section,
+			.note-section {
+				padding: var(--space-5);
 			}
 
-			.portrait-panel,
-			.copy-panel,
-			.note-card {
-				padding: 1rem;
+			.about-hero {
+				display: grid;
+				grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+				gap: var(--space-5);
+				align-items: start;
+				padding-top: var(--space-4);
 			}
 
 			.portrait-panel :global(img) {
 				width: 100%;
-				aspect-ratio: 1 / 1.16;
+				aspect-ratio: 1 / 1.1;
 				object-fit: cover;
 				border-radius: calc(var(--radius-xl) - 8px);
 			}
 
 			.copy-panel {
 				display: grid;
-				gap: 1rem;
-				padding: 1.6rem;
+				gap: var(--space-3);
+			}
+
+			.lead {
+				font-size: 1.12rem;
+				color: var(--ink);
+				max-width: 44rem;
+			}
+
+			.profile-strip {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.65rem;
+			}
+
+			.strip-item {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.58rem 0.95rem;
+				border-radius: 999px;
+				border: 1px solid var(--line);
+				background: #fff;
+				font-size: 0.86rem;
+				color: var(--ink-soft);
+			}
+
+			.strip-item strong {
+				font-size: 0.9rem;
+				color: var(--ink);
 			}
 
 			.copy-panel p {
 				max-width: 42rem;
-				font-size: 1.04rem;
 			}
 
-			.info-grid {
-				display: grid;
-				grid-template-columns: repeat(2, minmax(0, 1fr));
-				gap: 0.9rem;
-			}
-
-			.info-card {
-				padding: 1rem 1.1rem;
-				border-radius: var(--radius-lg);
-				background: rgba(255, 255, 255, 0.76);
-				border: 1px solid rgba(114, 138, 123, 0.12);
-			}
-
-			.info-card span {
-				display: block;
-				margin-bottom: 0.35rem;
-				font-size: 0.78rem;
-				font-weight: 700;
-				letter-spacing: 0.14em;
-				text-transform: uppercase;
-				color: var(--ink-faint);
-			}
-
+			.identity-grid,
+			.focus-grid,
+			.timeline-grid,
 			.note-grid {
 				display: grid;
 				grid-template-columns: repeat(3, minmax(0, 1fr));
-				gap: 1rem;
+				gap: var(--space-3);
 			}
 
-			.note-card {
+			.identity-grid {
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+			}
+
+			.identity-grid .info-card {
+				min-height: 156px;
+				background: #fff;
+			}
+
+			.identity-grid .info-card strong {
+				font-size: 1.02rem;
+				line-height: 1.45;
+			}
+
+			.identity-grid .info-card p {
+				font-size: 0.92rem;
+				color: var(--ink-soft);
+				line-height: 1.55;
+			}
+
+			.info-card {
 				display: grid;
-				gap: 0.7rem;
-				background: rgba(255, 255, 255, 0.76);
-				border: 1px solid rgba(114, 138, 123, 0.14);
-				border-radius: var(--radius-xl);
+				gap: 0.65rem;
+				padding: var(--space-4);
+				border-radius: var(--radius-lg);
+				background: var(--paper-strong);
+				border: 1px solid var(--line);
 			}
 
-			.note-card span {
+			.info-card span {
 				font-size: 0.78rem;
+				letter-spacing: 0.08em;
 				font-weight: 700;
-				letter-spacing: 0.14em;
-				text-transform: uppercase;
 				color: var(--ink-faint);
 			}
 
-			.contact-link {
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				width: fit-content;
+			.link-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.65rem;
+			}
+
+			.link-row a {
 				padding: 0.8rem 1rem;
 				border-radius: 999px;
-				background: var(--accent);
-				color: white;
+				border: 1px solid var(--line);
+				background: #fff;
 				font-weight: 700;
-				box-shadow: 0 16px 35px rgba(95, 141, 116, 0.24);
+				color: var(--ink-soft);
+			}
+
+			.link-row a:hover {
+				transform: translateY(-2px);
+				box-shadow: var(--shadow-sm);
+				color: var(--ink);
+			}
+
+			.section-head {
+				display: grid;
+				gap: var(--space-2);
+				margin-bottom: var(--space-4);
+			}
+
+			.status-list {
+				margin: 0;
+				padding-left: 1rem;
+			}
+
+			.status-list li + li {
+				margin-top: 0.45rem;
+			}
+
+			@media (max-width: 1120px) {
+				.identity-grid {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
 			}
 
 			@media (max-width: 960px) {
 				.about-hero,
+				.identity-grid,
+				.focus-grid,
+				.timeline-grid,
 				.note-grid {
 					grid-template-columns: 1fr;
 				}
 			}
 
 			@media (max-width: 720px) {
-				.copy-panel {
-					padding: 1.2rem;
-				}
-
-				.info-grid {
-					grid-template-columns: 1fr;
+				.about-hero,
+				.focus-section,
+				.timeline-section,
+				.note-section {
+					padding: var(--space-4);
 				}
 			}
 		</style>
@@ -123,52 +195,148 @@ import ProfileImage from '../assets/profile.jpg';
 	<body>
 		<Header />
 		<main>
-			<section class="about-hero">
-				<div class="portrait-panel soft-panel">
-					<Image src={ProfileImage} alt="sonder avatar" width={700} height={812} />
+			<section class="about-hero soft-panel">
+				<div class="portrait-panel">
+					<Image src={ProfileImage} alt="sonder avatar" width={720} height={792} />
 				</div>
-				<div class="copy-panel soft-panel">
-					<span class="section-tag">关于我</span>
+				<div class="copy-panel">
+					<span class="section-tag">个人档案</span>
 					<h1>你好，我是 sonder。</h1>
-					<p>这个博客是我给自己留的一块学习空间。它不追求把一切包装得很完美，而是更想把真实的理解过程、代码实践和阶段变化慢慢写清楚。</p>
-					<p>我希望这里看起来足够干净、足够舒展，也保留一点个人气质。这样每次打开的时候，不会觉得是在翻模板，而像是在翻自己的成长档案。</p>
-					<div class="info-grid">
+					<p class="lead">我在这里持续记录问题是如何被拆解、验证和复盘的，让每篇文章都成为下一次实践时可复用的起点。</p>
+					<div class="profile-strip">
+						<div class="strip-item">
+							<span>已发布</span>
+							<strong>{posts.length} 篇</strong>
+						</div>
+						<div class="strip-item">
+							<span>分类</span>
+							<strong>{categories.length} 个主题</strong>
+						</div>
+						<div class="strip-item">
+							<span>最近更新</span>
+							<strong>{latestDateLabel}</strong>
+						</div>
+					</div>
+					<p>我希望这个站长期可读、可回看。几个月或几年后再回来，依然能看见每个阶段真实的思考变化，而不只是最终结论。</p>
+					<div class="identity-grid">
 						<div class="info-card">
 							<span>昵称</span>
 							<strong>sonder</strong>
+							<p>持续学习中的开发者，偏爱把复杂问题写成清晰结构。</p>
 						</div>
 						<div class="info-card">
-							<span>一句话</span>
+							<span>个人主张</span>
 							<strong>保持热爱，无限进步</strong>
+							<p>长期主义地积累微小改进，让变化可见、可追踪。</p>
 						</div>
 						<div class="info-card">
-							<span>写作内容</span>
-							<strong>学习记录 / 实践笔记 / 阶段复盘</strong>
+							<span>当前关注</span>
+							<strong>{topCategories}</strong>
+							<p>围绕工程实践、内容组织与表达质量持续打磨。</p>
 						</div>
 						<div class="info-card">
-							<span>邮箱</span>
-							<strong>3192422357@qq.com</strong>
+							<span>更新方式</span>
+							<strong>文章 / 复盘 / 阶段记录</strong>
+							<p>优先记录过程与取舍，再沉淀成可复用的方法。</p>
+						</div>
+						<div class="info-card">
+							<span>最近一篇</span>
+							<strong>{latestPost?.data.title ?? '新的文章筹备中'}</strong>
+							<p>{latestDateLabel}</p>
+						</div>
+						<div class="info-card">
+							<span>下一步</span>
+							<strong>形成稳定专题输出</strong>
+							<p>让每个主题都逐步形成“从入门到进阶”的阅读路径。</p>
 						</div>
 					</div>
-					<a class="contact-link" href="mailto:3192422357@qq.com">给我发邮件</a>
+					<div class="link-row">
+						<a href="mailto:3192422357@qq.com">邮箱</a>
+						<a href="https://github.com/Misaka789" target="_blank" rel="noreferrer">GitHub</a>
+						<a href={`${baseURL}rss.xml`}>RSS</a>
+						<a href={`${baseURL}blog`}>文章归档</a>
+					</div>
 				</div>
 			</section>
 
-			<section class="note-grid">
-				<div class="note-card">
-					<span>为什么写</span>
-					<h3>为了让学习不只停留在“我好像懂了”</h3>
-					<p>很多内容只有写出来、重组过，才算真正进入自己的理解体系。这个博客就是这个过程的一部分。</p>
+			<section class="focus-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">当前关注</span>
+					<h2>最近在集中打磨这些方向</h2>
 				</div>
-				<div class="note-card">
-					<span>怎么写</span>
-					<h3>尽量写具体、写过程、写卡住的地方</h3>
-					<p>我会更关注真实的学习路径，而不是只保留最后那个“看起来正确”的答案。</p>
+				<div class="focus-grid">
+					<div class="info-card">
+						<span>工程实践</span>
+						<ul class="status-list">
+							<li>前端工程与构建体验</li>
+							<li>可维护的页面结构设计</li>
+							<li>组件级样式一致性</li>
+						</ul>
+					</div>
+					<div class="info-card">
+						<span>内容组织</span>
+						<ul class="status-list">
+							<li>分类和阅读路径联动</li>
+							<li>文章之间的关联跳转</li>
+							<li>长期专题化输出</li>
+						</ul>
+					</div>
+					<div class="info-card">
+						<span>写作方式</span>
+						<ul class="status-list">
+							<li>写清过程，而不是只写结论</li>
+							<li>记录真实取舍和踩坑</li>
+							<li>让内容可复用、可回看</li>
+						</ul>
+					</div>
 				</div>
-				<div class="note-card">
-					<span>我希望它变成什么</span>
-					<h3>以后回来看时，能看到自己确实走远了</h3>
-					<p>它既是写给别人的，也是写给未来的自己。最好几年后再翻，还能看见现在的认真。</p>
+			</section>
+
+			<section class="timeline-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">阶段状态</span>
+					<h2>我现在大概走到哪一步了</h2>
+				</div>
+				<div class="timeline-grid">
+					<div class="info-card">
+						<span>起点</span>
+						<h3>把知识点真正吃透</h3>
+						<p>从“看懂”走到“讲清楚”，这是我一直在练的基本功。</p>
+					</div>
+					<div class="info-card">
+						<span>当前</span>
+						<h3>把实践过程写成可复用经验</h3>
+						<p>不只写答案，也写路径和取舍，让内容对下一次实践有帮助。</p>
+					</div>
+					<div class="info-card">
+						<span>下一步</span>
+						<h3>形成稳定专题输出</h3>
+						<p>围绕前端工程、接口设计、内容系统持续积累，做成长期内容资产。</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="note-section soft-panel">
+				<div class="section-head">
+					<span class="section-tag">写作立场</span>
+					<h2>我为什么会持续写下去</h2>
+				</div>
+				<div class="note-grid">
+					<div class="info-card">
+						<span>为什么写</span>
+						<h3>不让学习停在“好像懂了”</h3>
+						<p>只有写出来、重组过、讲清楚，知识才真正变成自己的理解。</p>
+					</div>
+					<div class="info-card">
+						<span>怎么写</span>
+						<h3>尽量写过程、写卡点、写取舍</h3>
+						<p>我想保留的是完整路径，而不只是最后那个“看起来正确”的答案。</p>
+					</div>
+					<div class="info-card">
+						<span>希望它变成什么</span>
+						<h3>几年后仍能认出现在的认真</h3>
+						<p>它既写给别人，也写给未来的自己。持续累积，才更像成长本身。</p>
+					</div>
 				</div>
 			</section>
 		</main>

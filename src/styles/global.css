@@ -4,28 +4,37 @@
 
 :root {
 	color-scheme: light;
-	--bg: #edf4ef;
-	--bg-soft: #f6faf7;
-	--paper: rgba(245, 249, 246, 0.92);
-	--paper-strong: #fbfdfb;
-	--mint: #e2eee6;
-	--pearl: #f1f4ee;
-	--stone: #e8eee8;
-	--line: rgba(99, 124, 110, 0.14);
-	--line-strong: rgba(99, 124, 110, 0.22);
-	--ink: #24332a;
-	--ink-soft: #5f7066;
-	--ink-faint: #8b9c91;
-	--accent: #6d8d7a;
-	--accent-strong: #355748;
-	--accent-warm: #c28a69;
-	--shadow-sm: 0 12px 32px rgba(84, 110, 92, 0.055);
-	--shadow-md: 0 18px 44px rgba(84, 110, 92, 0.085);
-	--shadow-lg: 0 26px 76px rgba(84, 110, 92, 0.11);
-	--radius-xl: 36px;
-	--radius-lg: 28px;
+	--bg: #f4f6f3;
+	--bg-soft: #f8faf7;
+	--paper: rgba(248, 250, 247, 0.92);
+	--paper-strong: #fbfcfa;
+	--mint: #e8efe8;
+	--pearl: #f3f6f3;
+	--stone: #edf2ed;
+	--line: #dce5dd;
+	--line-strong: #cfdacb;
+	--ink: #223128;
+	--ink-soft: #6c7b70;
+	--ink-faint: #8d9a91;
+	--accent: #78967f;
+	--accent-strong: #68866f;
+	--accent-warm: #c48a6a;
+	--shadow-sm: 0 10px 26px rgba(58, 76, 64, 0.045);
+	--shadow-md: 0 16px 36px rgba(58, 76, 64, 0.065);
+	--shadow-lg: 0 24px 56px rgba(58, 76, 64, 0.085);
+	--radius-xl: 32px;
+	--radius-lg: 24px;
 	--radius-md: 18px;
 	--radius-sm: 12px;
+	--space-1: 8px;
+	--space-2: 12px;
+	--space-3: 16px;
+	--space-4: 24px;
+	--space-5: 32px;
+	--space-6: 48px;
+	--space-7: 64px;
+	--space-8: 80px;
+	--space-9: 120px;
 	--max-width: 1180px;
 	--content-width: 760px;
 	--font-sans: "Avenir Next", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
@@ -56,10 +65,10 @@ body {
 	line-height: 1.8;
 	color: var(--ink);
 	background:
-		radial-gradient(circle at 0% 0%, rgba(161, 196, 178, 0.12), transparent 24%),
-		radial-gradient(circle at 100% 18%, rgba(223, 235, 226, 0.28), transparent 28%),
-		radial-gradient(circle at 84% 100%, rgba(236, 239, 223, 0.18), transparent 24%),
-		linear-gradient(180deg, #f6faf7 0%, #edf4ef 100%);
+		radial-gradient(circle at 0% 0%, rgba(168, 191, 174, 0.13), transparent 24%),
+		radial-gradient(circle at 100% 18%, rgba(229, 237, 230, 0.3), transparent 30%),
+		radial-gradient(circle at 84% 100%, rgba(238, 241, 232, 0.2), transparent 24%),
+		linear-gradient(180deg, #f8faf7 0%, #f4f6f3 100%);
 	background-attachment: fixed;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -79,7 +88,7 @@ body::before {
 main {
 	width: min(calc(100% - 2rem), var(--max-width));
 	margin: 0 auto;
-	padding: 2rem 0 5rem;
+	padding: var(--space-5) 0 var(--space-8);
 	animation: rise-in 520ms var(--transition) both;
 }
 
@@ -228,16 +237,16 @@ li + li {
 }
 
 .soft-panel {
-	background: linear-gradient(180deg, rgba(249, 255, 251, 0.9), rgba(241, 247, 242, 0.96));
-	border: 1px solid rgba(103, 129, 114, 0.15);
+	background: linear-gradient(180deg, rgba(251, 252, 250, 0.96), rgba(247, 250, 246, 0.95));
+	border: 1px solid var(--line);
 	border-radius: var(--radius-xl);
 	box-shadow: var(--shadow-md);
 	backdrop-filter: blur(12px);
 }
 
 .card {
-	background: rgba(250, 255, 251, 0.84);
-	border: 1px solid rgba(103, 129, 114, 0.14);
+	background: rgba(251, 252, 250, 0.9);
+	border: 1px solid var(--line);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-sm);
 }
