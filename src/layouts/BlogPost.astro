@@ -1095,7 +1095,6 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 			});
 
 			const tocLinks = Array.from(document.querySelectorAll('[data-toc-link]'));
-			const tocList = document.querySelector('.toc-list');
 			const headingTargets = tocLinks
 				.map((link) => {
 					const slug = link.getAttribute('data-toc-link');
@@ -1106,7 +1105,9 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 			if (headingTargets.length > 0) {
 				const updateTocIndicator = (activeLink) => {
-					if (!tocList || !activeLink) return;
+					if (!activeLink) return;
+					const tocList = activeLink.closest('.toc-list');
+					if (!tocList) return;
 					tocList.style.setProperty('--toc-indicator-top', `${activeLink.offsetTop}px`);
 					tocList.style.setProperty('--toc-indicator-height', `${activeLink.offsetHeight}px`);
 					tocList.style.setProperty('--toc-indicator-opacity', '1');
@@ -1119,7 +1120,6 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 					const activeLink = headingTargets.find(({ target }) => target.id === id)?.link;
 					if (activeLink) {
 						updateTocIndicator(activeLink);
-						activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 					}
 				};
 
