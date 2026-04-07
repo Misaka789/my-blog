@@ -28,11 +28,10 @@ const formatDateTitle = (date: Date) =>
 		<style>
 			.hero {
 				display: grid;
-				grid-template-columns: minmax(0, 0.94fr) minmax(360px, 1.06fr);
-				gap: var(--space-6);
+				grid-template-columns: minmax(0, 0.55fr) minmax(280px, 0.45fr);
+				gap: var(--space-5);
 				align-items: stretch;
 				padding: var(--space-5);
-				padding-top: var(--space-5);
 				overflow: hidden;
 			}
 
@@ -78,12 +77,6 @@ const formatDateTitle = (date: Date) =>
 				color: var(--accent-strong);
 			}
 
-			.hero-intro p {
-				max-width: 28rem;
-				font-size: 0.98rem;
-				line-height: 1.74;
-			}
-
 			.hero-actions {
 				display: flex;
 				flex-wrap: wrap;
@@ -98,7 +91,7 @@ const formatDateTitle = (date: Date) =>
 				border-radius: 999px;
 				font-weight: 700;
 				border: 1px solid var(--line);
-				background: rgba(252, 255, 252, 0.78);
+				background: var(--card-bg-warm);
 			}
 
 			.hero-actions a.primary {
@@ -114,34 +107,6 @@ const formatDateTitle = (date: Date) =>
 				box-shadow: var(--shadow-sm);
 			}
 
-			.overview-strip {
-				display: grid;
-				grid-template-columns: repeat(2, minmax(0, 1fr));
-				gap: var(--space-3);
-			}
-
-			.stat-card {
-				display: grid;
-				gap: 0.4rem;
-				padding: 1rem 1.1rem;
-				border-radius: var(--radius-md);
-				background: rgba(252, 255, 252, 0.78);
-				border: 1px solid var(--line);
-			}
-
-			.stat-card span {
-				font-size: 0.78rem;
-				font-weight: 700;
-				letter-spacing: 0.12em;
-				text-transform: uppercase;
-				color: var(--ink-faint);
-			}
-
-			.stat-card strong {
-				font-size: 1.2rem;
-				line-height: 1.1;
-			}
-
 			.hero-right {
 				display: grid;
 				gap: 1.1rem;
@@ -150,10 +115,9 @@ const formatDateTitle = (date: Date) =>
 
 			.feature-card {
 				display: grid;
-				grid-template-rows: auto auto;
-				gap: 1.15rem;
+				grid-template-rows: auto;
 				padding: 1.1rem;
-				background: linear-gradient(180deg, rgba(247, 255, 250, 0.96), rgba(238, 249, 243, 0.92));
+				background: var(--feature-card-bg);
 				border: 1px solid var(--line);
 				border-radius: var(--radius-xl);
 				box-shadow: var(--shadow-sm);
@@ -166,34 +130,14 @@ const formatDateTitle = (date: Date) =>
 				border-radius: calc(var(--radius-xl) - 8px);
 			}
 
-			.quote-card {
-				display: grid;
-				gap: 0.25rem;
-				padding: 0 0.2rem;
-			}
-
-			.quote-card strong {
-				font-family: var(--font-display);
-				font-size: 1.55rem;
-				line-height: 1;
-				letter-spacing: -0.06em;
-				color: var(--accent-strong);
-			}
-
-			.quote-card span {
-				font-size: 0.76rem;
-				font-weight: 700;
-				letter-spacing: 0.12em;
-				text-transform: uppercase;
-				color: var(--ink-faint);
-			}
-
+			/* Feed & categories sections - lighter style without soft-panel */
 			.feed-section,
 			.categories-section {
 				display: grid;
 				gap: var(--space-4);
-				margin-top: var(--space-4);
-				padding: var(--space-4);
+				margin-top: var(--space-5);
+				padding: var(--space-5) 0;
+				border-top: 1px solid var(--line);
 			}
 
 			.section-head {
@@ -213,7 +157,7 @@ const formatDateTitle = (date: Date) =>
 				display: grid;
 				gap: 0.8rem;
 				padding: 1.1rem;
-				background: rgba(255, 252, 247, 0.76);
+				background: var(--card-bg-warm);
 				border: 1px solid var(--line);
 				border-radius: var(--radius-lg);
 				box-shadow: var(--shadow-sm);
@@ -263,14 +207,17 @@ const formatDateTitle = (date: Date) =>
 			}
 
 			@media (max-width: 720px) {
-				.hero,
-				.feed-section,
-				.categories-section {
+				.hero {
 					padding: var(--space-4);
 				}
 
-				.overview-strip {
-					grid-template-columns: 1fr;
+				.feed-section,
+				.categories-section {
+					padding: var(--space-4) 0;
+				}
+
+				.feature-card :global(img) {
+					aspect-ratio: 16 / 9;
 				}
 			}
 		</style>
@@ -283,22 +230,9 @@ const formatDateTitle = (date: Date) =>
 					<div class="hero-intro">
 						<div class="hero-kicker">A Learning Journal</div>
 						<h1>把思考写下来<span>让成长留下痕迹</span></h1>
-						<p>记录问题、过程和结论，让内容能回看，也能复用。</p>
 						<div class="hero-actions">
 							<a class="primary" href={fromHereHref}>从推荐文章开始</a>
 							<a href={`${baseURL}blog`}>浏览全部文章</a>
-							<a href={`${baseURL}about`}>关于我</a>
-						</div>
-					</div>
-
-					<div class="overview-strip">
-						<div class="stat-card">
-							<span>Published</span>
-							<strong>{posts.length} 篇文章</strong>
-						</div>
-						<div class="stat-card">
-							<span>Topics</span>
-							<strong>{groupPostsByCategory(posts).length} 个主题</strong>
 						</div>
 					</div>
 				</div>
@@ -306,15 +240,11 @@ const formatDateTitle = (date: Date) =>
 				<aside class="hero-right">
 					<div class="feature-card">
 						<Image src={HeroImage} alt="幽灵公主主题图" width={1200} height={980} />
-						<div class="quote-card">
-							<strong>“活下去”</strong>
-							<span>宫崎骏《幽灵公主》</span>
-						</div>
 					</div>
 				</aside>
 			</section>
 
-			<section class="feed-section soft-panel">
+			<section class="feed-section">
 				<div class="section-head">
 					<span class="section-tag">最近更新</span>
 					<h2>最近写的两篇</h2>
@@ -333,7 +263,7 @@ const formatDateTitle = (date: Date) =>
 				</div>
 			</section>
 
-			<section class="categories-section soft-panel">
+			<section class="categories-section">
 				<div class="section-head">
 					<span class="section-tag">主题浏览</span>
 					<h2>从主题开始阅读</h2>

@@ -41,11 +41,13 @@ const latestDateLabel = latestPost
 			.copy-panel,
 			.note-card,
 			.info-card {
-				background: rgba(255, 252, 247, 0.76);
+				background: var(--card-bg-warm);
 				border: 1px solid var(--line);
 			}
 
 			.portrait-panel {
+				display: grid;
+				gap: var(--space-3);
 				padding: 1rem;
 				border-radius: var(--radius-xl);
 				box-shadow: var(--shadow-sm);
@@ -120,7 +122,7 @@ const latestDateLabel = latestPost
 				gap: 0.45rem;
 				padding: 0.55rem 0.85rem;
 				border-radius: 999px;
-				background: rgba(244, 239, 231, 0.8);
+				background: var(--nav-bg);
 				border: 1px solid var(--line);
 				font-size: 0.84rem;
 				font-weight: 700;
@@ -140,7 +142,7 @@ const latestDateLabel = latestPost
 				padding: 0.8rem 1rem;
 				border-radius: 999px;
 				border: 1px solid var(--line);
-				background: rgba(255, 252, 247, 0.86);
+				background: var(--card-bg-warm);
 				font-weight: 700;
 				color: var(--ink-soft);
 			}
@@ -149,6 +151,32 @@ const latestDateLabel = latestPost
 				transform: translateY(-2px);
 				box-shadow: var(--shadow-sm);
 				color: var(--ink);
+			}
+
+			.favorite-quote {
+				display: grid;
+				gap: 0.4rem;
+				margin: 0;
+				padding: 1.1rem 1.25rem;
+				border-left: 3px solid var(--accent-warm);
+				border-radius: 0 12px 12px 0;
+				background: rgba(226, 168, 111, 0.1);
+			}
+
+			.favorite-quote strong {
+				font-family: var(--font-display);
+				font-size: 1.4rem;
+				line-height: 1.1;
+				letter-spacing: -0.04em;
+				color: var(--accent-strong);
+			}
+
+			.favorite-quote cite {
+				font-style: normal;
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				color: var(--ink-faint);
 			}
 
 			@media (max-width: 960px) {
@@ -179,17 +207,19 @@ const latestDateLabel = latestPost
 			<section class="about-hero soft-panel">
 				<div class="portrait-panel">
 					<Image src={ProfileImage} alt="sonder avatar" width={720} height={808} />
+					<blockquote class="favorite-quote">
+						<strong>"活下去"</strong>
+						<cite>宫崎骏《幽灵公主》</cite>
+					</blockquote>
 				</div>
 				<div class="copy-panel">
 					<span class="section-tag">关于我</span>
 					<h1>你好，我是 sonder</h1>
-					<p>我会把学习、实践和中间的思考过程记下来，让这些内容以后还能继续用。</p>
 					<div class="meta-strip">
 						<div>{posts.length} 篇文章</div>
 						<div>{categories.length} 个主题</div>
 						<div>最近更新于 {latestDateLabel}</div>
 					</div>
-					<p>这里更像一份长期展开的学习档案，重点不是答案本身，而是路径。</p>
 					<div class="info-grid">
 						<div class="info-card">
 							<span>昵称</span>
