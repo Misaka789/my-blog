@@ -8,6 +8,7 @@ export type CategoryMeta = {
 export type CategorizedPost = CollectionEntry<'blog'> & {
 	categoryName: string;
 	categoryKey: string;
+	readingTime: number;
 };
 
 const UNCATEGORIZED_LABEL = '未分类';
@@ -30,10 +31,17 @@ export const getCategoryNameFromId = (id: string) => {
 	return toDisplayName(segments[0]);
 };
 
+export const estimateReadingTime = (content: string) => {
+	const cjkCount = (content.match(/[\u4e00-\u9fff]/g) || []).length;
+	const latinWordCount = (content.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9_]+/g) || []).length;
+	return Math.max(1, Math.round(cjkCount / 300 + latinWordCount / 220));
+};
+
 export const getPostCategory = (post: CollectionEntry<'blog'>): CategorizedPost => ({
 	...post,
 	categoryKey: getCategoryKeyFromId(post.id),
 	categoryName: getCategoryNameFromId(post.id),
+	readingTime: estimateReadingTime(post.body || ''),
 });
 
 export const sortCategoryNames = (names: string[]) =>

@@ -7,7 +7,7 @@ import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 import { getPostCategory, groupPostsByCategory, toCategoryId } from '../../data/categories';
 
-const posts = (await getCollection('blog'))
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
 const categories = groupPostsByCategory(posts);
@@ -179,6 +179,18 @@ const formatDateTitle = (date: Date) =>
 				color: var(--ink-faint);
 			}
 
+			.series-badge {
+				display: inline-block;
+				margin-left: 0.5rem;
+				padding: 0.1rem 0.45rem;
+				border-radius: 999px;
+				background: var(--accent);
+				color: white;
+				font-size: 0.72rem;
+				font-weight: 600;
+				vertical-align: middle;
+			}
+
 			.post-content {
 				display: grid;
 				gap: 0.65rem;
@@ -247,7 +259,7 @@ const formatDateTitle = (date: Date) =>
 							<span class="eyebrow">{post.categoryName}</span>
 							<h3>{post.data.title}</h3>
 							<p>{post.data.description}</p>
-							<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
+							<div class="post-date"><FormattedDate date={post.data.pubDate} /> · {post.readingTime} 分钟</div>
 						</a>
 					))}
 				</div>
@@ -268,7 +280,7 @@ const formatDateTitle = (date: Date) =>
 					<div class="post-list">
 						{category.posts.map((post) => (
 							<a href={`${baseURL}blog/${post.id}/`} class="post-item" title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
-								<div class="post-date"><FormattedDate date={post.data.pubDate} /></div>
+								<div class="post-date"><FormattedDate date={post.data.pubDate} /> · {post.readingTime} 分钟{post.data.series && <span class="series-badge">📚 {post.data.series}</span>}</div>
 								<div class="post-content">
 									<h3>{post.data.title}</h3>
 									<p>{post.data.description}</p>
