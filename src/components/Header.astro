@@ -19,7 +19,12 @@ const baseURL = import.meta.env.BASE_URL;
 		<div class="header-extras">
 			<slot />
 		</div>
-		<nav class="nav-links" aria-label="Primary">
+		<button type="button" class="hamburger" aria-label="打开菜单" aria-expanded="false" data-hamburger>
+			<span class="hamburger-line"></span>
+			<span class="hamburger-line"></span>
+			<span class="hamburger-line"></span>
+		</button>
+		<nav class="nav-links" aria-label="Primary" data-nav-links>
 			<HeaderLink href={baseURL}>首页</HeaderLink>
 			<HeaderLink href={`${baseURL}blog`}>文章</HeaderLink>
 			<HeaderLink href={`${baseURL}about`}>关于</HeaderLink>
@@ -42,11 +47,12 @@ const baseURL = import.meta.env.BASE_URL;
 		top: 0;
 		z-index: 40;
 		padding: 1rem 0 0;
-		background: linear-gradient(180deg, rgba(251, 248, 242, 0.96), rgba(251, 248, 242, 0.72), transparent);
+		background: var(--header-bg);
 		backdrop-filter: blur(14px);
 	}
 
 	.header-shell {
+		position: relative;
 		min-height: 74px;
 		display: flex;
 		align-items: center;
@@ -54,7 +60,7 @@ const baseURL = import.meta.env.BASE_URL;
 		gap: 1rem;
 		padding: 0.65rem 0.85rem;
 		border-radius: 999px;
-		background: rgba(255, 252, 247, 0.84);
+		background: var(--header-shell-bg);
 		border: 1px solid var(--line);
 		box-shadow: var(--shadow-sm);
 	}
@@ -81,7 +87,7 @@ const baseURL = import.meta.env.BASE_URL;
 		height: 3.3rem;
 		border-radius: 999px;
 		object-fit: cover;
-		box-shadow: 0 8px 22px rgba(43, 38, 30, 0.12);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.identity-copy {
@@ -107,8 +113,45 @@ const baseURL = import.meta.env.BASE_URL;
 		gap: 0.2rem;
 		padding: 0.24rem;
 		border-radius: 999px;
-		background: rgba(244, 239, 231, 0.78);
+		background: var(--nav-bg);
 		border: 1px solid var(--line);
+	}
+
+	/* Hamburger button - hidden on desktop */
+	.hamburger {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		width: 2.8rem;
+		height: 2.8rem;
+		padding: 0;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		background: var(--nav-bg);
+		cursor: pointer;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.hamburger-line {
+		display: block;
+		width: 1.1rem;
+		height: 2px;
+		border-radius: 2px;
+		background: var(--ink-soft);
+		transition: transform var(--transition), opacity var(--transition);
+	}
+
+	.hamburger[aria-expanded="true"] .hamburger-line:nth-child(1) {
+		transform: translateY(6px) rotate(45deg);
+	}
+
+	.hamburger[aria-expanded="true"] .hamburger-line:nth-child(2) {
+		opacity: 0;
+	}
+
+	.hamburger[aria-expanded="true"] .hamburger-line:nth-child(3) {
+		transform: translateY(-6px) rotate(-45deg);
 	}
 
 	.theme-toggle {
@@ -127,7 +170,7 @@ const baseURL = import.meta.env.BASE_URL;
 	}
 
 	.theme-toggle:hover {
-		background: rgba(255, 255, 255, 0.82);
+		background: var(--surface);
 		border-color: var(--line);
 	}
 
@@ -227,20 +270,38 @@ const baseURL = import.meta.env.BASE_URL;
 	@media (max-width: 720px) {
 		.header-shell {
 			border-radius: var(--radius-xl);
-			padding: 0.75rem;
-			flex-direction: column;
-			align-items: stretch;
+			padding: 0.65rem 0.85rem;
+			flex-direction: row;
+			flex-wrap: wrap;
 		}
 
-		.identity {
-			justify-content: center;
+		.identity-copy {
+			display: none;
 		}
 
 		.header-extras {
-			justify-content: center;
+			flex: 1;
+		}
+
+		.hamburger {
+			display: inline-flex;
 		}
 
 		.nav-links {
+			display: none;
+			width: 100%;
+			flex-direction: column;
+			padding: var(--space-2);
+			border-radius: var(--radius-lg);
+			order: 10;
+		}
+
+		.nav-links.open {
+			display: flex;
+		}
+
+		.nav-links .theme-toggle {
+			width: 100%;
 			justify-content: center;
 		}
 	}
@@ -250,8 +311,10 @@ const baseURL = import.meta.env.BASE_URL;
 	const root = document.documentElement;
 	const toggle = document.querySelector('[data-theme-toggle]');
 	const region = document.querySelector('[data-toast-region]');
+	const hamburger = document.querySelector('[data-hamburger]');
+	const navLinks = document.querySelector('[data-nav-links]');
 
-	const showToast = (message) => {
+	const showToast = (message: string) => {
 		if (!region) return;
 		const toast = document.createElement('div');
 		toast.className = 'toast';
@@ -260,9 +323,9 @@ const baseURL = import.meta.env.BASE_URL;
 		window.setTimeout(() => toast.remove(), 1800);
 	};
 
-	window.showToast = showToast;
+	(window as any).showToast = showToast;
 
-	const applyTheme = (theme) => {
+	const applyTheme = (theme: string) => {
 		root.dataset.theme = theme;
 		localStorage.setItem('sonder-theme', theme);
 		toggle?.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
@@ -277,5 +340,24 @@ const baseURL = import.meta.env.BASE_URL;
 		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
 		applyTheme(next);
 		showToast(next === 'dark' ? '已切换到夜间模式' : '已切换到日间模式');
+	});
+
+	// Hamburger menu toggle
+	hamburger?.addEventListener('click', () => {
+		const isOpen = hamburger.getAttribute('aria-expanded') === 'true';
+		hamburger.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+		hamburger.setAttribute('aria-label', isOpen ? '打开菜单' : '关闭菜单');
+		navLinks?.classList.toggle('open', !isOpen);
+	});
+
+	// Close menu when clicking outside
+	document.addEventListener('click', (e) => {
+		if (!hamburger || !navLinks) return;
+		const target = e.target as HTMLElement;
+		if (!hamburger.contains(target) && !navLinks.contains(target)) {
+			hamburger.setAttribute('aria-expanded', 'false');
+			hamburger.setAttribute('aria-label', '打开菜单');
+			navLinks.classList.remove('open');
+		}
 	});
 </script>

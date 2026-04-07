@@ -34,9 +34,21 @@ const formatDateTitle = (date: Date) =>
 				padding: 0.95rem 1rem;
 				border: 1px solid var(--line);
 				border-radius: 12px;
-				background: rgba(255, 252, 247, 0.84);
+				background: var(--input-bg);
 				color: var(--ink);
 				font: inherit;
+			}
+
+			.search-input::placeholder {
+				color: var(--ink-faint);
+			}
+
+			.search-empty {
+				display: none;
+				padding: var(--space-5) var(--space-4);
+				text-align: center;
+				color: var(--ink-faint);
+				font-size: 0.95rem;
 			}
 
 			.category-nav-shell {
@@ -60,7 +72,7 @@ const formatDateTitle = (date: Date) =>
 				gap: 0.45rem;
 				padding: 0.62rem 0.86rem;
 				border-radius: 999px;
-				background: rgba(255, 252, 247, 0.78);
+				background: var(--card-bg-warm);
 				border: 1px solid var(--line);
 				color: var(--ink-soft);
 				font-size: 0.84rem;
@@ -78,12 +90,19 @@ const formatDateTitle = (date: Date) =>
 				color: var(--ink-faint);
 			}
 
-			.latest-section,
+			.latest-section {
+				display: grid;
+				gap: var(--space-3);
+				padding: var(--space-5) 0;
+				margin-top: var(--space-3);
+				border-top: 1px solid var(--line);
+			}
+
 			.category-section {
 				display: grid;
 				gap: var(--space-3);
-				padding: var(--space-5);
-				margin-top: var(--space-3);
+				padding: var(--space-5) 0;
+				border-top: 1px solid var(--line);
 				scroll-margin-top: 8rem;
 			}
 
@@ -103,7 +122,7 @@ const formatDateTitle = (date: Date) =>
 				gap: 0.75rem;
 				padding: 1.2rem;
 				border-radius: var(--radius-lg);
-				background: rgba(255, 252, 247, 0.78);
+				background: var(--card-bg-warm);
 				border: 1px solid var(--line);
 				box-shadow: var(--shadow-sm);
 			}
@@ -148,7 +167,7 @@ const formatDateTitle = (date: Date) =>
 				gap: var(--space-3);
 				align-items: start;
 				padding: var(--space-4);
-				background: rgba(255, 252, 247, 0.72);
+				background: var(--card-bg-warm);
 				border: 1px solid var(--line);
 				border-radius: var(--radius-lg);
 				box-shadow: var(--shadow-sm);
@@ -177,10 +196,13 @@ const formatDateTitle = (date: Date) =>
 			}
 
 			@media (max-width: 720px) {
-				.search-shell,
+				.search-shell {
+					padding: var(--space-4);
+				}
+
 				.latest-section,
 				.category-section {
-					padding: var(--space-4);
+					padding: var(--space-4) 0;
 				}
 
 				.latest-grid,
@@ -214,7 +236,7 @@ const formatDateTitle = (date: Date) =>
 				</div>
 			</section>
 
-			<section class="latest-section soft-panel">
+			<section class="latest-section">
 				<div class="section-head">
 					<span class="section-tag">最近更新</span>
 					<h2>如果是第一次来，建议先从这里开始</h2>
@@ -231,8 +253,10 @@ const formatDateTitle = (date: Date) =>
 				</div>
 			</section>
 
+			<div class="search-empty" data-search-empty>没有找到匹配的文章，试试其他关键词？</div>
+
 			{categories.map((category) => (
-				<section class="category-section soft-panel" id={toCategoryId(category.name)} data-category-section>
+				<section class="category-section" id={toCategoryId(category.name)} data-category-section>
 					<div class="category-head">
 						<div class="category-copy">
 							<span class="section-tag">{category.name}</span>
@@ -258,23 +282,40 @@ const formatDateTitle = (date: Date) =>
 		</main>
 		<Footer />
 		<script>
-			const input = document.querySelector('[data-search-input]');
-			const items = Array.from(document.querySelectorAll('[data-search-item]'));
-			const sections = Array.from(document.querySelectorAll('[data-category-section]'));
+			const input = document.querySelector('[data-search-input]') as HTMLInputElement | null;
+			const items = Array.from(document.querySelectorAll('[data-search-item]')) as HTMLElement[];
+			const sections = Array.from(document.querySelectorAll('[data-category-section]')) as HTMLElement[];
+			const emptyEl = document.querySelector('[data-search-empty]') as HTMLElement | null;
+
+			let debounceTimer: ReturnType<typeof setTimeout>;
 
 			const updateSearch = () => {
 				const query = input?.value.trim().toLowerCase() || '';
+				let visibleCount = 0;
+
 				items.forEach((item) => {
 					const text = item.getAttribute('data-search-text')?.toLowerCase() || '';
-					item.style.display = !query || text.includes(query) ? '' : 'none';
+					const match = !query || text.includes(query);
+					item.style.display = match ? '' : 'none';
+					if (match) visibleCount++;
 				});
+
 				sections.forEach((section) => {
-					const visible = Array.from(section.querySelectorAll('[data-search-item]')).some((item) => item.style.display !== 'none');
+					const visible = Array.from(section.querySelectorAll('[data-search-item]')).some(
+						(item) => (item as HTMLElement).style.display !== 'none'
+					);
 					section.style.display = visible || !query ? '' : 'none';
 				});
+
+				if (emptyEl) {
+					emptyEl.style.display = query && visibleCount === 0 ? 'block' : 'none';
+				}
 			};
 
-			input?.addEventListener('input', updateSearch);
+			input?.addEventListener('input', () => {
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(updateSearch, 200);
+			});
 		</script>
 	</body>
 </html>
