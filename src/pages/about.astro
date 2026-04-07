@@ -9,7 +9,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import ProfileImage from '../assets/profile.jpg';
 
 const baseURL = import.meta.env.BASE_URL;
-const posts = (await getCollection('blog'))
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
 const categories = groupPostsByCategory(posts);

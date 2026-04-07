@@ -1,0 +1,100 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const baseURL = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`404 - ${SITE_TITLE}`} description="页面未找到" />
+		<style>
+			.not-found {
+				display: grid;
+				gap: var(--space-3);
+				justify-items: center;
+				text-align: center;
+				padding: var(--space-8) var(--space-4);
+			}
+
+			.not-found-code {
+				font-family: var(--font-display);
+				font-size: clamp(5rem, 14vw, 9rem);
+				line-height: 1;
+				letter-spacing: -0.06em;
+				color: var(--ink-faint);
+				opacity: 0.3;
+			}
+
+			.not-found h1 {
+				font-size: clamp(1.6rem, 3vw, 2.4rem);
+			}
+
+			.not-found p {
+				max-width: 28rem;
+				font-size: 0.98rem;
+			}
+
+			.not-found-quote {
+				margin-top: var(--space-2);
+				padding: 0.8rem 1.2rem;
+				border-left: 3px solid var(--accent-warm);
+				border-radius: 0 10px 10px 0;
+				background: rgba(226, 168, 111, 0.1);
+				font-style: italic;
+				color: var(--ink-soft);
+				font-size: 0.92rem;
+			}
+
+			.not-found-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.7rem;
+				margin-top: var(--space-2);
+			}
+
+			.not-found-actions a {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 0.8rem 1.1rem;
+				border-radius: 999px;
+				font-weight: 700;
+				border: 1px solid var(--line);
+				background: var(--card-bg-warm);
+			}
+
+			.not-found-actions a.primary {
+				background: var(--accent);
+				color: white;
+				border-color: transparent;
+			}
+
+			.not-found-actions a:hover {
+				transform: translateY(-2px);
+				box-shadow: var(--shadow-sm);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="not-found">
+				<div class="not-found-code">404</div>
+				<h1>这个页面迷路了</h1>
+				<p>你访问的页面不存在，可能是地址输错了，也可能是它已经被移走了。</p>
+				<div class="not-found-quote">
+					"无论前方的路有多苦，只要走的方向正确，不管多么崎岖不平，都比站在原地更接近幸福。" —— 宫崎骏《千与千寻》
+				</div>
+				<div class="not-found-actions">
+					<a class="primary" href={baseURL}>回到首页</a>
+					<a href={`${baseURL}blog`}>浏览文章</a>
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

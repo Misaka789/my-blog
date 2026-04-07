@@ -6,7 +6,7 @@ import BlogPost from '../../layouts/BlogPost.astro';
 import { getCategoryMeta, getPostCategory } from '../../data/categories';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft);
 	return posts.map((post) => ({
 		params: { slug: post.id },
 		props: post,
@@ -17,13 +17,20 @@ type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 const currentPost = getPostCategory(post);
-const allPosts = (await getCollection('blog'))
+const allPosts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
 	.map(getPostCategory);
 const currentIndex = allPosts.findIndex((entry) => entry.id === currentPost.id);
 const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] : undefined;
 const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const categoryCount = allPosts.filter((entry) => entry.categoryName === currentPost.categoryName).length;
+
+// 系列文章
+const seriesPosts = post.data.series
+	? allPosts
+		.filter((p) => p.data.series === post.data.series)
+		.sort((a, b) => (a.data.seriesOrder ?? 0) - (b.data.seriesOrder ?? 0))
+	: [];
 const estimateReadingTime = (content: string) => {
 	const cjkCount = (content.match(/[\u4e00-\u9fff]/g) || []).length;
 	const latinWordCount = (content.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9_]+/g) || []).length;
@@ -66,6 +73,8 @@ const displayUpdatedDate =
 	readingTime={readingTime}
 	previousPost={previousPost}
 	nextPost={nextPost}
+	seriesPosts={seriesPosts}
+	currentPostId={post.id}
 >
 	<Content />
 </BlogPost>

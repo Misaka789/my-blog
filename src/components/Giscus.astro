@@ -1,0 +1,203 @@
+---
+interface Props {
+	class?: string;
+}
+---
+
+<section class="giscus-wrapper">
+	<div class="giscus-header">
+		<h3 class="giscus-title">
+			<span>💬 评论</span>
+			<span class="giscus-count" data-giscus-count></span>
+		</h3>
+		<p class="giscus-hint">
+			<svg class="giscus-gh-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+				<path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+			</svg>
+			需要 <a href="https://github.com/login" target="_blank" rel="noopener noreferrer">GitHub 账号</a> 登录后发表评论
+		</p>
+	</div>
+
+	<!-- Loading skeleton -->
+	<div class="giscus-skeleton" data-giscus-skeleton>
+		<div class="skeleton-input"></div>
+		<div class="skeleton-line w80"></div>
+		<div class="skeleton-line w60"></div>
+	</div>
+
+	<div class="giscus" data-giscus-container></div>
+</section>
+
+<style>
+	.giscus-wrapper {
+		margin-top: var(--space-4);
+		padding: var(--space-4);
+		border-radius: var(--radius-md);
+		background: var(--card-bg-warm);
+		border: 1px solid var(--line);
+	}
+
+	.giscus-header {
+		display: grid;
+		gap: 0.4rem;
+		margin-bottom: var(--space-3);
+	}
+
+	.giscus-title {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.giscus-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.6rem;
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		background: var(--accent);
+		color: white;
+		font-size: 0.72rem;
+		font-weight: 700;
+		opacity: 0;
+		transform: scale(0.8);
+		transition: opacity 0.3s, transform 0.3s;
+	}
+
+	.giscus-count.visible {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	.giscus-count.zero {
+		background: var(--ink-faint);
+	}
+
+	.giscus-hint {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin: 0;
+		font-size: 0.78rem;
+		color: var(--ink-faint);
+	}
+
+	.giscus-gh-icon {
+		flex-shrink: 0;
+		opacity: 0.6;
+	}
+
+	.giscus-hint a {
+		color: var(--accent);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.giscus-hint a:hover {
+		text-decoration: underline;
+	}
+
+	/* Loading skeleton */
+	.giscus-skeleton {
+		display: grid;
+		gap: 0.7rem;
+		padding: var(--space-3);
+		border-radius: var(--radius-sm);
+		background: var(--surface);
+		border: 1px solid var(--line);
+		animation: skeleton-pulse 1.5s ease-in-out infinite;
+	}
+
+	.giscus-skeleton.hidden {
+		display: none;
+	}
+
+	.skeleton-input {
+		height: 3.5rem;
+		border-radius: 8px;
+		background: var(--line);
+	}
+
+	.skeleton-line {
+		height: 0.7rem;
+		border-radius: 4px;
+		background: var(--line);
+	}
+
+	.skeleton-line.w80 { width: 80%; }
+	.skeleton-line.w60 { width: 60%; }
+
+	@keyframes skeleton-pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
+	}
+
+	/* Giscus iframe container */
+	:global(.giscus-frame) {
+		border-radius: 8px !important;
+	}
+</style>
+
+<script>
+	const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+	const skeleton = document.querySelector('[data-giscus-skeleton]');
+	const container = document.querySelector('[data-giscus-container]');
+
+	const script = document.createElement('script');
+	script.src = 'https://giscus.app/client.js';
+	script.setAttribute('data-repo', 'Misaka789/my-blog');
+	script.setAttribute('data-repo-id', 'R_kgDOR4nUEw');
+	script.setAttribute('data-category', 'Announcements');
+	script.setAttribute('data-category-id', 'DIC_kwDOR4nUE84C6RHN');
+	script.setAttribute('data-mapping', 'pathname');
+	script.setAttribute('data-strict', '0');
+	script.setAttribute('data-reactions-enabled', '1');
+	script.setAttribute('data-emit-metadata', '1');
+	script.setAttribute('data-input-position', 'top');
+	script.setAttribute('data-loading', 'lazy');
+	script.setAttribute('data-theme', theme);
+	script.setAttribute('data-lang', 'zh-CN');
+	script.setAttribute('crossorigin', 'anonymous');
+	script.async = true;
+
+	container?.appendChild(script);
+
+	// Listen for metadata to show comment count + hide skeleton
+	window.addEventListener('message', (event) => {
+		if (event.origin !== 'https://giscus.app') return;
+		const data = event.data?.giscus;
+
+		// Hide skeleton once iframe is ready
+		if (data && skeleton) {
+			skeleton.classList.add('hidden');
+		}
+
+		if (!data?.discussion) return;
+
+		const count = data.discussion.totalCommentCount ?? 0;
+		const countEl = document.querySelector('[data-giscus-count]');
+		if (countEl) {
+			if (count > 0) {
+				countEl.textContent = String(count);
+			} else {
+				countEl.textContent = '0';
+				countEl.classList.add('zero');
+			}
+			countEl.classList.add('visible');
+		}
+	});
+
+	// Sync theme changes
+	window.addEventListener('sonder:theme-change', ((e: CustomEvent) => {
+		const iframe = document.querySelector<HTMLIFrameElement>('.giscus-frame');
+		iframe?.contentWindow?.postMessage(
+			{ giscus: { setConfig: { theme: e.detail.theme } } },
+			'https://giscus.app'
+		);
+	}) as EventListener);
+</script>

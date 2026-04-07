@@ -1,0 +1,100 @@
+---
+interface Props {
+	slug: string;
+}
+const { slug } = Astro.props;
+---
+
+<div class="article-feedback" data-feedback data-slug={slug}>
+	<p class="feedback-question">这篇文章对你有帮助吗？</p>
+	<div class="feedback-buttons">
+		<button type="button" class="feedback-btn" data-feedback-value="yes">有帮助</button>
+		<button type="button" class="feedback-btn" data-feedback-value="no">没帮助</button>
+	</div>
+	<p class="feedback-thanks" style="display:none;">感谢反馈！</p>
+</div>
+
+<style>
+	.article-feedback {
+		display: grid;
+		gap: var(--space-2);
+		justify-items: center;
+		text-align: center;
+		padding: var(--space-4);
+		margin-top: var(--space-4);
+		border-top: 1px solid var(--line);
+	}
+
+	.feedback-question {
+		font-weight: 700;
+		color: var(--ink);
+	}
+
+	.feedback-buttons {
+		display: flex;
+		gap: var(--space-2);
+	}
+
+	.feedback-btn {
+		padding: 0.6rem 1.1rem;
+		border-radius: 999px;
+		border: 1px solid var(--line);
+		background: var(--card-bg-warm);
+		color: var(--ink-soft);
+		font: inherit;
+		font-weight: 700;
+		font-size: 0.88rem;
+		cursor: pointer;
+		transition:
+			transform var(--transition),
+			background-color var(--transition),
+			color var(--transition),
+			box-shadow var(--transition);
+	}
+
+	.feedback-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-sm);
+		color: var(--ink);
+	}
+
+	.feedback-btn.selected {
+		background: var(--accent);
+		color: white;
+		border-color: transparent;
+	}
+
+	.feedback-thanks {
+		font-size: 0.9rem;
+		color: var(--ink-faint);
+	}
+</style>
+
+<script>
+	const container = document.querySelector('[data-feedback]');
+	if (container) {
+		const slug = container.getAttribute('data-slug') || '';
+		const key = `sonder-feedback-${slug}`;
+		const buttons = container.querySelectorAll('[data-feedback-value]');
+		const thanks = container.querySelector('.feedback-thanks') as HTMLElement;
+		const btnGroup = container.querySelector('.feedback-buttons') as HTMLElement;
+
+		const existing = localStorage.getItem(key);
+		if (existing) {
+			btnGroup.style.display = 'none';
+			thanks.style.display = '';
+		}
+
+		buttons.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const value = btn.getAttribute('data-feedback-value') || '';
+				localStorage.setItem(key, value);
+				btn.classList.add('selected');
+				setTimeout(() => {
+					btnGroup.style.display = 'none';
+					thanks.style.display = '';
+				}, 300);
+			});
+		});
+	}
+</script>
