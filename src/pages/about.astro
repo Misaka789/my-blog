@@ -46,6 +46,8 @@ const latestDateLabel = latestPost
 			}
 
 			.portrait-panel {
+				display: grid;
+				gap: var(--space-3);
 				padding: 1rem;
 				border-radius: var(--radius-xl);
 				box-shadow: var(--shadow-sm);
@@ -205,6 +207,10 @@ const latestDateLabel = latestPost
 			<section class="about-hero soft-panel">
 				<div class="portrait-panel">
 					<Image src={ProfileImage} alt="sonder avatar" width={720} height={808} />
+					<blockquote class="favorite-quote">
+						<strong>"活下去"</strong>
+						<cite>宫崎骏《幽灵公主》</cite>
+					</blockquote>
 				</div>
 				<div class="copy-panel">
 					<span class="section-tag">关于我</span>
@@ -238,10 +244,6 @@ const latestDateLabel = latestPost
 							<p>{latestDateLabel}</p>
 						</div>
 					</div>
-					<blockquote class="favorite-quote">
-						<strong>"活下去"</strong>
-						<cite>宫崎骏《幽灵公主》</cite>
-					</blockquote>
 					<div class="link-row">
 						<a href="mailto:3192422357@qq.com">邮箱</a>
 						<a href="https://github.com/Misaka789" target="_blank" rel="noreferrer">GitHub</a>
