@@ -151,6 +151,32 @@ const latestDateLabel = latestPost
 				color: var(--ink);
 			}
 
+			.favorite-quote {
+				display: grid;
+				gap: 0.4rem;
+				margin: 0;
+				padding: 1.1rem 1.25rem;
+				border-left: 3px solid var(--accent-warm);
+				border-radius: 0 12px 12px 0;
+				background: rgba(226, 168, 111, 0.1);
+			}
+
+			.favorite-quote strong {
+				font-family: var(--font-display);
+				font-size: 1.4rem;
+				line-height: 1.1;
+				letter-spacing: -0.04em;
+				color: var(--accent-strong);
+			}
+
+			.favorite-quote cite {
+				font-style: normal;
+				font-size: 0.82rem;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				color: var(--ink-faint);
+			}
+
 			@media (max-width: 960px) {
 				.about-hero,
 				.info-grid {
@@ -212,6 +238,10 @@ const latestDateLabel = latestPost
 							<p>{latestDateLabel}</p>
 						</div>
 					</div>
+					<blockquote class="favorite-quote">
+						<strong>"活下去"</strong>
+						<cite>宫崎骏《幽灵公主》</cite>
+					</blockquote>
 					<div class="link-row">
 						<a href="mailto:3192422357@qq.com">邮箱</a>
 						<a href="https://github.com/Misaka789" target="_blank" rel="noreferrer">GitHub</a>

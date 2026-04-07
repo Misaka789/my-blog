@@ -1119,7 +1119,13 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 					const activeLink = headingTargets.find(({ target }) => target.id === id)?.link;
 					if (activeLink) {
 						updateTocIndicator(activeLink);
-						activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+						// Scroll TOC container only, avoid hijacking page scroll
+						const tocContainer = tocList?.parentElement;
+						if (tocContainer && tocContainer.scrollHeight > tocContainer.clientHeight) {
+							const linkTop = activeLink.offsetTop;
+							const containerHeight = tocContainer.clientHeight;
+							tocContainer.scrollTop = linkTop - containerHeight / 2 + activeLink.offsetHeight / 2;
+						}
 					}
 				};
 
