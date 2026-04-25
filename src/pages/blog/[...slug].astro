@@ -1,7 +1,5 @@
 ﻿---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
-import { existsSync, statSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { getCategoryMeta, getPostCategory } from '../../data/categories';
 
@@ -37,18 +35,6 @@ const estimateReadingTime = (content: string) => {
 	return Math.max(1, Math.round(cjkCount / 300 + latinWordCount / 220));
 };
 
-const resolvePostFilePath = (filePath?: string) => {
-	if (!filePath) return undefined;
-
-	const directPath = isAbsolute(filePath) ? filePath : resolve(filePath);
-	if (existsSync(directPath)) return directPath;
-
-	const contentPath = resolve('src/content/blog', filePath);
-	if (existsSync(contentPath)) return contentPath;
-
-	return undefined;
-};
-
 const isSameCalendarDate = (left: Date, right: Date) =>
 	left.getFullYear() === right.getFullYear() &&
 	left.getMonth() === right.getMonth() &&
@@ -56,11 +42,9 @@ const isSameCalendarDate = (left: Date, right: Date) =>
 
 const readingTime = estimateReadingTime(post.body);
 const { Content, headings } = await render(post);
-const postFilePath = resolvePostFilePath(post.filePath);
-const lastModifiedDate = postFilePath ? statSync(postFilePath).mtime : undefined;
 const displayUpdatedDate =
-	lastModifiedDate && !isSameCalendarDate(lastModifiedDate, post.data.pubDate)
-		? lastModifiedDate
+	post.data.updatedDate && !isSameCalendarDate(post.data.updatedDate, post.data.pubDate)
+		? post.data.updatedDate
 		: undefined;
 ---
 

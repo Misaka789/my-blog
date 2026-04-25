@@ -812,10 +812,46 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 				backdrop-filter: none;
 			}
 
+			.toc-summary {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 0.75rem;
+				cursor: pointer;
+				list-style: none;
+				padding: 0.6rem 0.7rem;
+				border-radius: 12px;
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
+				color: var(--ink-soft);
+				font-size: 0.86rem;
+				font-weight: 700;
+			}
+
+			.toc-summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.toc-summary-count {
+				color: var(--ink-faint);
+				font-size: 0.78rem;
+			}
+
+			.toc-summary::after {
+				content: "展开";
+				color: var(--accent-strong);
+				font-size: 0.78rem;
+			}
+
+			.article-toc[open] .toc-summary::after {
+				content: "收起";
+			}
+
 			.toc-list {
 				position: relative;
 				display: grid;
 				gap: 0.35rem;
+				margin-top: 0.55rem;
 				padding-left: 0.85rem;
 				border-left: 1px solid var(--line);
 			}
@@ -1067,13 +1103,17 @@ const tocItems = headings.filter((heading) => heading.depth >= 2 && heading.dept
 
 				<div class:list={['article-content', { 'has-toc': tocItems.length > 0 }]}>
 					{tocItems.length > 0 && (
-						<aside class="article-toc soft-panel">
+						<details class="article-toc soft-panel" data-toc-details>
+							<summary class="toc-summary">
+								<span>目录</span>
+								<span class="toc-summary-count">{tocItems.length} 项</span>
+							</summary>
 							<div class="toc-list">
 								{tocItems.map((heading) => (
 									<a class={`toc-link depth-${heading.depth}`} href={`#${heading.slug}`} data-toc-link={heading.slug}>{heading.text}</a>
 								))}
 							</div>
-						</aside>
+						</details>
 					)}
 
 					<div class="article-body soft-panel">

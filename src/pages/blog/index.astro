@@ -51,11 +51,66 @@ const formatDateTitle = (date: Date) =>
 				font-size: 0.95rem;
 			}
 
-			.category-nav-shell {
-				position: sticky;
-				top: 5.8rem;
-				z-index: 15;
+			.archive-section {
+				display: grid;
+				gap: var(--space-3);
 				margin-top: var(--space-3);
+				padding: var(--space-5) 0;
+				border-top: 1px solid var(--line);
+				scroll-margin-top: 8rem;
+			}
+
+			.archive-summary {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: var(--space-3);
+				align-items: center;
+				cursor: pointer;
+				list-style: none;
+			}
+
+			.archive-summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.archive-summary-copy {
+				display: grid;
+				gap: 0.75rem;
+			}
+
+			.archive-summary h2 {
+				font-size: clamp(1.8rem, 3vw, 2.45rem);
+			}
+
+			.archive-toggle {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 4.5rem;
+				padding: 0.62rem 0.86rem;
+				border-radius: 999px;
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
+				color: var(--ink-soft);
+				font-size: 0.84rem;
+				font-weight: 700;
+			}
+
+			.archive-toggle::after {
+				content: "展开";
+			}
+
+			.archive-section[open] .archive-toggle::after {
+				content: "收起";
+			}
+
+			.archive-content {
+				display: grid;
+				gap: var(--space-3);
+				margin-top: var(--space-3);
+			}
+
+			.category-nav-shell {
 				padding: 0.9rem 1rem;
 			}
 
@@ -138,6 +193,12 @@ const formatDateTitle = (date: Date) =>
 				grid-template-columns: minmax(0, 1fr) auto;
 				gap: var(--space-3);
 				align-items: end;
+				cursor: pointer;
+				list-style: none;
+			}
+
+			.category-head::-webkit-details-marker {
+				display: none;
 			}
 
 			.category-copy {
@@ -156,9 +217,36 @@ const formatDateTitle = (date: Date) =>
 				color: var(--ink-faint);
 			}
 
+			.category-toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.65rem;
+				color: var(--ink-faint);
+				font-size: 0.84rem;
+				font-weight: 700;
+			}
+
+			.category-toggle::after {
+				content: "展开";
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 3rem;
+				padding: 0.52rem 0.72rem;
+				border-radius: 999px;
+				background: rgba(255, 252, 247, 0.78);
+				border: 1px solid var(--line);
+				color: var(--ink-soft);
+			}
+
+			.category-section[open] .category-toggle::after {
+				content: "收起";
+			}
+
 			.post-list {
 				display: grid;
 				gap: var(--space-3);
+				margin-top: var(--space-3);
 			}
 
 			.post-item {
@@ -213,11 +301,13 @@ const formatDateTitle = (date: Date) =>
 				}
 
 				.latest-section,
+				.archive-section,
 				.category-section {
 					padding: var(--space-4) 0;
 				}
 
 				.latest-grid,
+				.archive-summary,
 				.category-head,
 				.post-item {
 					grid-template-columns: 1fr;
@@ -237,21 +327,10 @@ const formatDateTitle = (date: Date) =>
 				<input class="search-input" type="search" placeholder="搜索标题、描述或分类" data-search-input />
 			</section>
 
-			<section class="category-nav-shell soft-panel">
-				<div class="category-nav">
-					{categories.map((category) => (
-						<a href={`#${toCategoryId(category.name)}`}>
-							<span>{category.name}</span>
-							<span class="category-count">{category.count} 篇</span>
-						</a>
-					))}
-				</div>
-			</section>
-
 			<section class="latest-section">
 				<div class="section-head">
 					<span class="section-tag">最近更新</span>
-					<h2>如果是第一次来，建议先从这里开始</h2>
+					<h2>最新文章</h2>
 				</div>
 				<div class="latest-grid">
 					{latestPosts.map((post) => (
@@ -267,37 +346,63 @@ const formatDateTitle = (date: Date) =>
 
 			<div class="search-empty" data-search-empty>没有找到匹配的文章，试试其他关键词？</div>
 
-			{categories.map((category) => (
-				<section class="category-section" id={toCategoryId(category.name)} data-category-section>
-					<div class="category-head">
-						<div class="category-copy">
-							<span class="section-tag">{category.name}</span>
-							<h2>{category.name}</h2>
-							<p>{category.summary} {category.readerHint}</p>
+			<details class="archive-section soft-panel" data-archive-section>
+				<summary class="archive-summary">
+					<div class="archive-summary-copy">
+						<span class="section-tag">分类归档</span>
+						<h2>按主题浏览</h2>
+						<p>{categories.length} 个主题，{posts.length} 篇文章。</p>
+					</div>
+					<span class="archive-toggle" aria-hidden="true"></span>
+				</summary>
+				<div class="archive-content">
+					<section class="category-nav-shell">
+						<div class="category-nav">
+							{categories.map((category) => (
+								<a href={`#${toCategoryId(category.name)}`} data-category-nav-link={toCategoryId(category.name)}>
+									<span>{category.name}</span>
+									<span class="category-count">{category.count} 篇</span>
+								</a>
+							))}
 						</div>
-						<div class="post-count">{category.count} 篇</div>
-					</div>
-					<div class="post-list">
-						{category.posts.map((post) => (
-							<a href={`${baseURL}blog/${post.id}/`} class="post-item" title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
-								<div class="post-date"><FormattedDate date={post.data.pubDate} /> · {post.readingTime} 分钟{post.data.series && <span class="series-badge">📚 {post.data.series}</span>}</div>
-								<div class="post-content">
-									<h3>{post.data.title}</h3>
-									<p>{post.data.description}</p>
+					</section>
+
+						{categories.map((category) => (
+							<details class="category-section" id={toCategoryId(category.name)} data-category-section>
+								<summary class="category-head">
+									<div class="category-copy">
+										<span class="section-tag">{category.name}</span>
+										<h2>{category.name}</h2>
+										<p>{category.summary}</p>
+									</div>
+									<div class="category-toggle">
+										<span class="post-count">{category.count} 篇</span>
 								</div>
-								<div class="post-arrow" aria-hidden="true">↗</div>
-							</a>
-						))}
-					</div>
-				</section>
-			))}
+							</summary>
+								<div class="post-list">
+									{category.posts.map((post) => (
+										<a href={`${baseURL}blog/${post.id}/`} class="post-item" title={formatDateTitle(post.data.pubDate)} data-search-item data-search-text={`${post.data.title} ${post.data.description} ${post.categoryName}`}>
+											<div class="post-date"><FormattedDate date={post.data.pubDate} /> · {post.readingTime} 分钟{post.data.series && <span class="series-badge">📚 {post.data.series}</span>}</div>
+											<div class="post-content">
+												<h3>{post.data.title}</h3>
+												<p>{post.data.description}</p>
+										</div>
+										<div class="post-arrow" aria-hidden="true">↗</div>
+									</a>
+								))}
+							</div>
+						</details>
+					))}
+				</div>
+			</details>
 		</main>
 		<Footer />
 		<script>
 			const input = document.querySelector('[data-search-input]') as HTMLInputElement | null;
 			const items = Array.from(document.querySelectorAll('[data-search-item]')) as HTMLElement[];
-			const sections = Array.from(document.querySelectorAll('[data-category-section]')) as HTMLElement[];
+			const sections = Array.from(document.querySelectorAll('[data-category-section]')) as HTMLDetailsElement[];
 			const emptyEl = document.querySelector('[data-search-empty]') as HTMLElement | null;
+			const archive = document.querySelector('[data-archive-section]') as HTMLDetailsElement | null;
 
 			let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -317,7 +422,12 @@ const formatDateTitle = (date: Date) =>
 						(item) => (item as HTMLElement).style.display !== 'none'
 					);
 					section.style.display = visible || !query ? '' : 'none';
+					section.open = query ? visible : false;
 				});
+
+				if (archive) {
+					archive.open = Boolean(query);
+				}
 
 				if (emptyEl) {
 					emptyEl.style.display = query && visibleCount === 0 ? 'block' : 'none';
@@ -325,9 +435,29 @@ const formatDateTitle = (date: Date) =>
 			};
 
 			input?.addEventListener('input', () => {
-				clearTimeout(debounceTimer);
-				debounceTimer = setTimeout(updateSearch, 200);
+					clearTimeout(debounceTimer);
+					debounceTimer = setTimeout(updateSearch, 200);
+				});
+
+			const openHashCategory = () => {
+				const id = window.location.hash.slice(1);
+				if (!id) return;
+				const section = document.getElementById(id) as HTMLDetailsElement | null;
+				if (!section?.matches('[data-category-section]')) return;
+				if (archive) archive.open = true;
+				section.open = true;
+			};
+
+			document.querySelectorAll('[data-category-nav-link]').forEach((link) => {
+				link.addEventListener('click', () => {
+					const id = link.getAttribute('data-category-nav-link');
+					const section = id ? document.getElementById(id) as HTMLDetailsElement | null : null;
+					if (section) section.open = true;
+				});
 			});
+
+			openHashCategory();
+			window.addEventListener('hashchange', openHashCategory);
 		</script>
 	</body>
 </html>

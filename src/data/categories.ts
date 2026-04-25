@@ -54,12 +54,12 @@ export const sortCategoryNames = (names: string[]) =>
 export const getCategoryMeta = (_name: string, count = 0): CategoryMeta => ({
 	summary:
 		count > 1
-			? `这个主题下已经有 ${count} 篇文章，适合按顺序慢慢读。`
-			: '这个主题还在持续更新，先从这篇开始就很好。',
+			? `${count} 篇文章，按更新时间整理。`
+			: '1 篇文章，后续继续补充。',
 	readerHint:
 		count > 1
-			? '建议先从最近更新的一篇开始，再顺着相关文章往下读。'
-			: '先读完这篇，再去看看其他主题也会很有收获。',
+			? '从最近更新开始读。'
+			: '持续整理中。',
 });
 
 export const groupPostsByCategory = (posts: Array<CollectionEntry<'blog'> | CategorizedPost>) => {
